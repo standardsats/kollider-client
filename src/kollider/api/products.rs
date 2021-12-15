@@ -15,11 +15,17 @@ pub struct Product {
     #[serde(deserialize_with = "deserialize_number_from_string")]
     pub base_margin: f64,
     #[serde(deserialize_with = "deserialize_number_from_string")]
-    pub maintnance_margin: f64,
+    pub maintenance_margin: f64,
     pub is_inverse_priced: bool,
+    #[serde(deserialize_with = "deserialize_number_from_string")]
     pub price_dp: f64,
     pub underlying_symbol: Symbol,
+    #[serde(deserialize_with = "deserialize_number_from_string")]
     pub last_price: f64,
+    #[serde(deserialize_with = "deserialize_number_from_string")]
+    pub tick_size: f64,
+    #[serde(deserialize_with = "deserialize_number_from_string")]
+    pub risk_limit: f64,
 }
 
 #[cfg(test)]
@@ -36,22 +42,26 @@ mod tests {
               "contract_size": "1",
               "max_leverage": "100.00",
               "base_margin": "0.00500",
-              "maintnance_margin": "0.00400",
+              "maintenance_margin": "0.00400",
               "is_inverse_priced": true,
-              "price_dp": 1,
+              "price_dp": "1",
               "underlying_symbol": ".XTBUSD",
-              "last_price": 130713
+              "last_price": "130713",
+              "tick_size": "0.5",
+              "risk_limit": "100000000"
             },
             "LTCUSD.PERP": {
               "symbol": "LTCUSD.PERP",
               "contract_size": "1",
               "max_leverage": "25.00",
               "base_margin": "0.00500",
-              "maintnance_margin": "0.00400",
+              "maintenance_margin": "0.00400",
               "is_inverse_priced": false,
-              "price_dp": 1,
+              "price_dp": "1",
               "underlying_symbol": ".LTCUSD",
-              "last_price": 546
+              "last_price": "546",
+              "tick_size": "0.5",
+              "risk_limit": "100000000"
             }
         }"#;
 
@@ -65,22 +75,26 @@ mod tests {
                     contract_size: 1.0,
                     max_leverage: 100.0,
                     base_margin: 0.005,
-                    maintnance_margin: 0.004,
+                    maintenance_margin: 0.004,
                     is_inverse_priced: true,
                     price_dp: 1.0,
                     underlying_symbol: ".XTBUSD".to_owned(),
                     last_price: 130713.0,
+                    tick_size: 0.5,
+                    risk_limit: 100000000.0,
                 },
                 "LTCUSD.PERP".to_owned() => Product {
                     symbol: "LTCUSD.PERP".to_owned(),
                     contract_size: 1.0,
                     max_leverage: 25.0,
                     base_margin: 0.005,
-                    maintnance_margin: 0.004,
+                    maintenance_margin: 0.004,
                     is_inverse_priced: false,
                     price_dp: 1.0,
                     underlying_symbol: ".LTCUSD".to_owned(),
                     last_price: 546.0,
+                    tick_size: 0.5,
+                    risk_limit: 100000000.0,
                 },
             }
         );
