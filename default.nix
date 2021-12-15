@@ -18,7 +18,7 @@ let
   merged-openssl = pkgs.symlinkJoin { name = "merged-openssl"; paths = [ pkgs.openssl.out pkgs.openssl.dev ]; };
 in
 naersk.buildPackage {
-  name = "kollider-api";
+  name = "kollider-client";
   root = pkgs.lib.sourceFilesBySuffices ./. [".rs" ".toml" ".lock" ".html" ".css" ".png"];
   buildInputs = with pkgs; [ openssl pkgconfig clang llvm llvmPackages.libclang zlib cacert curl ];
   LIBCLANG_PATH = "${pkgs.llvmPackages.libclang}/lib";
