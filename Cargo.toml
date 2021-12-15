@@ -1,0 +1,22 @@
+[package]
+name = "kollider-api"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+base64 = "0.13.0"
+clap = "3.0.0-rc.4"
+reqwest = { version = "0.11", features = [ "json" ] }
+serde_json = "1.0"
+tokio = { version = "1", features = ["full"] }
+
+[lib]
+name = "kollider_api"
+path = "src/lib.rs"
+
+[[bin]]
+name = "kollider-cli"
+path = "src/bin.rs"
