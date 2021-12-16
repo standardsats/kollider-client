@@ -34,7 +34,7 @@ mod tests {
     use std::collections::HashMap;
 
     #[test]
-    fn test_meta_payload() {
+    fn test_product_deserialize() {
         let data = r#"
         {
             "BTCUSD.PERP": {

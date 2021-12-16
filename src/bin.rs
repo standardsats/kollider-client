@@ -16,12 +16,19 @@ struct Args {
 enum SubCommand {
     Products,
     Orderbook(OrderbookCmd),
+    Ticker(TickerCmd),
 }
 
 #[derive(Parser, Debug)]
 struct OrderbookCmd {
     #[clap(short, long, default_value="2")]
     level: u64,
+    #[clap(short, long, default_value="BTCUSD.PERP")]
+    symbol: String,
+}
+
+#[derive(Parser, Debug)]
+struct TickerCmd {
     #[clap(short, long, default_value="BTCUSD.PERP")]
     symbol: String,
 }
@@ -42,9 +49,13 @@ async fn main() -> Result<(), Box<dyn Error>> {
             println!("Response /market/products: {:?}", resp);
         }
         SubCommand::Orderbook(OrderbookCmd{level, symbol}) => {
-            let book_level = OrderBookLevel::from_int(level).unwrap();
+            let book_level = OrderBookLevel::from_int(level).expect("Order book level is either 2 or 3");
             let resp = client.market_orderbook(book_level, &symbol).await?;
             println!("Response /market/orderbook: {:?}", resp);
+        }
+        SubCommand::Ticker(TickerCmd{symbol}) => {
+            let resp = client.market_ticker(&symbol).await?;
+            println!("Response /market/ticker: {:?}", resp);
         }
     }
 

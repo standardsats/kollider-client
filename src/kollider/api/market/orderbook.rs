@@ -1,4 +1,4 @@
-use super::products::Symbol;
+use super::super::products::Symbol;
 use serde::{
     de::{self, Deserializer},
     Deserialize,
