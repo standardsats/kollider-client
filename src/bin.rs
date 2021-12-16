@@ -20,6 +20,7 @@ enum SubCommand {
     Orderbook(OrderbookCmd),
     Ticker(TickerCmd),
     History(HistoryCmd),
+    Account(AccountCmd)
 }
 
 #[derive(Parser, Debug)]
@@ -50,11 +51,22 @@ struct HistoryCmd {
     interval: IntervalSize,
 }
 
+#[derive(Parser, Debug)]
+struct AccountCmd {
+    #[clap(long, env = "KOLLIDER_API_KEY", hide_env_values = true)]
+    api_key: String,
+    #[clap(long, env = "KOLLIDER_API_SECRET", hide_env_values = true)]
+    api_secret: String,
+    #[clap(long, env = "KOLLIDER_API_PASSWORD", hide_env_values = true)]
+    password: String,
+}
+
+
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     let args = Args::parse();
 
-    let client = if args.testnet {
+    let mut client = if args.testnet {
         KolliderClient::testnet()
     } else {
         KolliderClient::mainnet()
@@ -79,6 +91,11 @@ async fn main() -> Result<(), Box<dyn Error>> {
             let end_time = end.unwrap_or_else(|| Local::now());
             let resp = client.market_historic_index_prices(limit, &symbol, start_time, end_time, interval).await?;
             println!("Response /market/historic_index_prices: {:?}", resp);
+        }
+        SubCommand::Account(AccountCmd{api_key, api_secret, password}) => {
+            client.auth = Some(KolliderAuth::new(&api_key, &api_secret, &password)?);
+            let resp = client.user_account().await?;
+            println!("Response /user/account: {:?}", resp);
         }
     }
 

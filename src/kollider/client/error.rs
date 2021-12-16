@@ -1,2 +1,18 @@
-/// Alias to the errors wrapper returned by the module
-pub type Result<T> = std::result::Result<T, reqwest::Error>;
+use thiserror::Error;
+use crate::kollider::api::error::KolliderError;
+use crate::kollider::env::AuthError;
+
+#[derive(Error, Debug)]
+pub enum Error {
+    #[error("Reqwesting server error: {0}")]
+    ReqwestErr(#[from] reqwest::Error),
+    #[error("Launcher information file error: {0}")]
+    ServerErr(#[from] KolliderError),
+    #[error("You need authentificate to call {0}")]
+    AuthRequired(String),
+    #[error("Error while forming authentification heaaders: {0}")]
+    AuthError(#[from] AuthError),
+}
+
+/// Alias for a `Result` with the error type `self::Error`.
+pub type Result<T> = std::result::Result<T, Error>;

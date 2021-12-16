@@ -52,8 +52,8 @@ impl KolliderClient {
                 ("end", format!("{}", end.timestamp())),
                 ("interval_size", format!("{}", interval_size)),
             ]);
-        println!("URL: {}", build_request.clone()().build().unwrap().url());
-        println!("{}", build_request.clone()().send().await?.text().await?);
+        // println!("URL: {}", build_request.clone()().build().unwrap().url());
+        // println!("{}", build_request.clone()().send().await?.text().await?);
         let raw_res = build_request()
             .send()
             .await?;
