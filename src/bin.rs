@@ -20,7 +20,9 @@ enum SubCommand {
     Orderbook(OrderbookCmd),
     Ticker(TickerCmd),
     History(HistoryCmd),
-    Account(AccountCmd)
+    Account(AccountCmd),
+    #[clap(subcommand)]
+    Deposit(DepositSub)
 }
 
 #[derive(Parser, Debug)]
@@ -62,6 +64,34 @@ struct AccountCmd {
 }
 
 
+#[derive(Parser, Debug)]
+enum DepositSub {
+    Btc(DepositBtc),
+    Ln(DepositLn),
+}
+
+#[derive(Parser, Debug)]
+struct DepositBtc {
+    #[clap(long, env = "KOLLIDER_API_KEY", hide_env_values = true)]
+    api_key: String,
+    #[clap(long, env = "KOLLIDER_API_SECRET", hide_env_values = true)]
+    api_secret: String,
+    #[clap(long, env = "KOLLIDER_API_PASSWORD", hide_env_values = true)]
+    password: String,
+}
+
+#[derive(Parser, Debug)]
+struct DepositLn {
+    #[clap(long, env = "KOLLIDER_API_KEY", hide_env_values = true)]
+    api_key: String,
+    #[clap(long, env = "KOLLIDER_API_SECRET", hide_env_values = true)]
+    api_secret: String,
+    #[clap(long, env = "KOLLIDER_API_PASSWORD", hide_env_values = true)]
+    password: String,
+    #[clap(long, help = "Amount of deposit in sats")]
+    amount: u64,
+}
+
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     let args = Args::parse();
@@ -96,6 +126,18 @@ async fn main() -> Result<(), Box<dyn Error>> {
             client.auth = Some(KolliderAuth::new(&api_key, &api_secret, &password)?);
             let resp = client.user_account().await?;
             println!("Response /user/account: {:?}", resp);
+        }
+        SubCommand::Deposit(deposit_sub) => match deposit_sub {
+            DepositSub::Btc(DepositBtc{api_key, api_secret, password}) => {
+                client.auth = Some(KolliderAuth::new(&api_key, &api_secret, &password)?);
+                let resp = client.wallet_deposit(&DepositBody::Bitcoin).await?;
+                println!("Response /wallet/deposit: {:?}", resp);
+            }
+            DepositSub::Ln(DepositLn{api_key, api_secret, password, amount}) => {
+                client.auth = Some(KolliderAuth::new(&api_key, &api_secret, &password)?);
+                let resp = client.wallet_deposit(&DepositBody::Lighting(amount)).await?;
+                println!("Response /wallet/deposit: {:?}", resp);
+            }
         }
     }
 
