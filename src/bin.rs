@@ -4,31 +4,14 @@ use kollider_api::kollider::api::*;
 use kollider_api::kollider::client::*;
 use chrono::prelude::*;
 use chrono::Duration;
-use do_notation::m;
 
 #[derive(Parser, Debug)]
 #[clap(about, version, author)]
 struct Args {
     #[clap(short, long)]
     testnet: bool,
-    #[clap(long, env = "KOLLIDER_API_KEY", hide_env_values = true)]
-    api_key: Option<String>,
-    #[clap(long, env = "KOLLIDER_API_SECRET", hide_env_values = true)]
-    api_secret: Option<String>,
-    #[clap(long, env = "KOLLIDER_API_PASSWORD", hide_env_values = true)]
-    password: Option<String>,
     #[clap(subcommand)]
     subcmd: SubCommand,
-}
-
-fn require_auth(args: &Args) -> Result<KolliderAuth, base64::DecodeError> {
-    let mauth = m! {
-        api_key <- args.api_key.as_ref();
-        api_secret <- args.api_secret.as_ref();
-        password <- args.password.as_ref();
-        Some(KolliderAuth::new(api_key, api_secret, password))
-    };
-    mauth.expect("We require auth information for that endpoint. Provide api_key, api_secret and password, please.")
 }
 
 #[derive(Parser, Debug)]
@@ -74,7 +57,12 @@ struct HistoryCmd {
 
 #[derive(Parser, Debug)]
 struct AccountCmd {
-
+    #[clap(long, env = "KOLLIDER_API_KEY", hide_env_values = true)]
+    api_key: String,
+    #[clap(long, env = "KOLLIDER_API_SECRET", hide_env_values = true)]
+    api_secret: String,
+    #[clap(long, env = "KOLLIDER_API_PASSWORD", hide_env_values = true)]
+    password: String,
 }
 
 #[derive(Parser, Debug)]
@@ -87,11 +75,22 @@ enum DepositSub {
 
 #[derive(Parser, Debug)]
 struct DepositBtc {
-
+    #[clap(long, env = "KOLLIDER_API_KEY", hide_env_values = true)]
+    api_key: String,
+    #[clap(long, env = "KOLLIDER_API_SECRET", hide_env_values = true)]
+    api_secret: String,
+    #[clap(long, env = "KOLLIDER_API_PASSWORD", hide_env_values = true)]
+    password: String,
 }
 
 #[derive(Parser, Debug)]
 struct DepositLn {
+    #[clap(long, env = "KOLLIDER_API_KEY", hide_env_values = true)]
+    api_key: String,
+    #[clap(long, env = "KOLLIDER_API_SECRET", hide_env_values = true)]
+    api_secret: String,
+    #[clap(long, env = "KOLLIDER_API_PASSWORD", hide_env_values = true)]
+    password: String,
     #[clap(long, help = "Amount of deposit in sats")]
     amount: u64,
 }
@@ -106,6 +105,12 @@ enum WithdrawalSub {
 
 #[derive(Parser, Debug)]
 struct WithdrawalBtc {
+    #[clap(long, env = "KOLLIDER_API_KEY", hide_env_values = true)]
+    api_key: String,
+    #[clap(long, env = "KOLLIDER_API_SECRET", hide_env_values = true)]
+    api_secret: String,
+    #[clap(long, env = "KOLLIDER_API_PASSWORD", hide_env_values = true)]
+    password: String,
     /// BTC receiving address
     address: String,
     #[clap(long, help = "Amount of withdrawal in sats")]
@@ -114,6 +119,12 @@ struct WithdrawalBtc {
 
 #[derive(Parser, Debug)]
 struct WithdrawalLn {
+    #[clap(long, env = "KOLLIDER_API_KEY", hide_env_values = true)]
+    api_key: String,
+    #[clap(long, env = "KOLLIDER_API_SECRET", hide_env_values = true)]
+    api_secret: String,
+    #[clap(long, env = "KOLLIDER_API_PASSWORD", hide_env_values = true)]
+    password: String,
     /// Payment request
     invoice: String,
     #[clap(long, help = "Amount of withdrawal in sats")]
@@ -153,29 +164,29 @@ async fn main() -> Result<(), Box<dyn Error>> {
             let resp = client.market_historic_index_prices(limit, &symbol, start_time, end_time, interval).await?;
             println!("Response /market/historic_index_prices: {:?}", resp);
         }
-        SubCommand::Account(AccountCmd{}) => {
-            let auth = require_auth(&args)?;
+        SubCommand::Account(AccountCmd{api_key, api_secret, password}) => {
+            let auth = KolliderAuth::new(&api_key, &api_secret, &password)?;
             client.auth = Some(auth);
             let resp = client.user_account().await?;
             println!("Response /user/account: {:?}", resp);
         }
         SubCommand::Deposit(ref deposit_sub) => match deposit_sub {
-            DepositSub::Btc(DepositBtc{}) => {
-                let auth = require_auth(&args)?;
+            DepositSub::Btc(DepositBtc{api_key, api_secret, password}) => {
+                let auth = KolliderAuth::new(&api_key, &api_secret, &password)?;
                 client.auth = Some(auth);
                 let resp = client.wallet_deposit(&DepositBody::Bitcoin).await?;
                 println!("Response /wallet/deposit: {:?}", resp);
             }
-            DepositSub::Ln(DepositLn{amount}) => {
-                let auth = require_auth(&args)?;
+            DepositSub::Ln(DepositLn{api_key, api_secret, password, amount}) => {
+                let auth = KolliderAuth::new(&api_key, &api_secret, &password)?;
                 client.auth = Some(auth);
                 let resp = client.wallet_deposit(&DepositBody::Lighting(*amount)).await?;
                 println!("Response /wallet/deposit: {:?}", resp);
             }
         }
         SubCommand::Withdrawal(ref withdrawal_sub) => match withdrawal_sub {
-            WithdrawalSub::Btc(WithdrawalBtc{address, amount}) => {
-                let auth = require_auth(&args)?;
+            WithdrawalSub::Btc(WithdrawalBtc{api_key, api_secret, password, address, amount}) => {
+                let auth = KolliderAuth::new(&api_key, &api_secret, &password)?;
                 client.auth = Some(auth);
                 let resp = client.wallet_withdrawal(&WithdrawalBody::Bitcoin {
                     _type: BtcTag::BTC,
@@ -184,8 +195,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 }).await?;
                 println!("Response /wallet/withwallet_withdrawal: {:?}", resp);
             }
-            WithdrawalSub::Ln(WithdrawalLn{invoice, amount}) => {
-                let auth = require_auth(&args)?;
+            WithdrawalSub::Ln(WithdrawalLn{api_key, api_secret, password, invoice, amount}) => {
+                let auth = KolliderAuth::new(&api_key, &api_secret, &password)?;
                 client.auth = Some(auth);
                 let resp = client.wallet_withdrawal(&WithdrawalBody::Lighting {
                     _type: LnTag::Ln,
