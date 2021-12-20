@@ -13,6 +13,9 @@ chrono = "0.4.19"
 clap = { version = "3.0.0-rc.4", features = ["derive", "env"] }
 crypto-common = "0.1.1"
 hmac = "0.12.0"
+log = "0.4.14"
+env_logger = { version = "0.9.0", optional = true }
+do-notation = { version = "0.1.3", optional = true }
 reqwest = { version = "0.11", features = [ "json" ] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
@@ -24,6 +27,9 @@ tokio = { version = "1", features = ["full"] }
 [dev-dependencies]
 maplit = "1.0.2"
 
+[features]
+build-binary = ["env_logger", "do-notation"]
+
 [lib]
 name = "kollider_api"
 path = "src/lib.rs"
@@ -31,3 +37,4 @@ path = "src/lib.rs"
 [[bin]]
 name = "kollider-cli"
 path = "src/bin.rs"
+required-features = ["build-binary"]

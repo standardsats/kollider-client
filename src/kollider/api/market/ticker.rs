@@ -1,5 +1,4 @@
-use super::super::products::Symbol;
-use super::orderbook::OrderSide;
+use super::super::{products::Symbol, order::OrderSide};
 use serde::Deserialize;
 use serde_aux::field_attributes::deserialize_number_from_string;
 

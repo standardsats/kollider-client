@@ -6,9 +6,6 @@ use super::error::Result;
 impl KolliderClient {
     /// GET endpoint `/market/api`
     pub async fn market_products(&self) -> Result<HashMap<Symbol, Product>> {
-        let endpoint = format!("{}/{}", self.server, "market/products");
-        let raw_res = self.client.get(endpoint).send().await?;
-        // println!("{}", self.client.get(endpoint).send().await?.text().await?);
-        Ok(raw_res.json().await?)
+        self.get_request_noargs("/market/products").await
     }
 }

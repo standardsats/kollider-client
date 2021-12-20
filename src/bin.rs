@@ -4,6 +4,7 @@ use kollider_api::kollider::api::*;
 use kollider_api::kollider::client::*;
 use chrono::prelude::*;
 use chrono::Duration;
+use do_notation::m;
 
 #[derive(Parser, Debug)]
 #[clap(about, version, author)]
@@ -11,13 +12,23 @@ struct Args {
     #[clap(short, long)]
     testnet: bool,
     #[clap(long, env = "KOLLIDER_API_KEY", hide_env_values = true)]
-    api_key: String,
+    api_key: Option<String>,
     #[clap(long, env = "KOLLIDER_API_SECRET", hide_env_values = true)]
-    api_secret: String,
+    api_secret: Option<String>,
     #[clap(long, env = "KOLLIDER_API_PASSWORD", hide_env_values = true)]
-    password: String,
+    password: Option<String>,
     #[clap(subcommand)]
     subcmd: SubCommand,
+}
+
+fn require_auth(args: &Args) -> Result<KolliderAuth, base64::DecodeError> {
+    let mauth = m! {
+        api_key <- args.api_key.as_ref();
+        api_secret <- args.api_secret.as_ref();
+        password <- args.password.as_ref();
+        Some(KolliderAuth::new(api_key, api_secret, password))
+    };
+    mauth.expect("We require auth information for that endpoint. Provide api_key, api_secret and password, please.")
 }
 
 #[derive(Parser, Debug)]
@@ -114,6 +125,8 @@ struct WithdrawalLn {
 async fn main() -> Result<(), Box<dyn Error>> {
     let args = Args::parse();
 
+    env_logger::init();
+
     let mut client = if args.testnet {
         KolliderClient::testnet()
     } else {
@@ -141,38 +154,43 @@ async fn main() -> Result<(), Box<dyn Error>> {
             println!("Response /market/historic_index_prices: {:?}", resp);
         }
         SubCommand::Account(AccountCmd{}) => {
-            client.auth = Some(KolliderAuth::new(&args.api_key, &args.api_secret, &args.password)?);
+            let auth = require_auth(&args)?;
+            client.auth = Some(auth);
             let resp = client.user_account().await?;
             println!("Response /user/account: {:?}", resp);
         }
-        SubCommand::Deposit(deposit_sub) => match deposit_sub {
+        SubCommand::Deposit(ref deposit_sub) => match deposit_sub {
             DepositSub::Btc(DepositBtc{}) => {
-                client.auth = Some(KolliderAuth::new(&args.api_key, &args.api_secret, &args.password)?);
+                let auth = require_auth(&args)?;
+                client.auth = Some(auth);
                 let resp = client.wallet_deposit(&DepositBody::Bitcoin).await?;
                 println!("Response /wallet/deposit: {:?}", resp);
             }
             DepositSub::Ln(DepositLn{amount}) => {
-                client.auth = Some(KolliderAuth::new(&args.api_key, &args.api_secret, &args.password)?);
-                let resp = client.wallet_deposit(&DepositBody::Lighting(amount)).await?;
+                let auth = require_auth(&args)?;
+                client.auth = Some(auth);
+                let resp = client.wallet_deposit(&DepositBody::Lighting(*amount)).await?;
                 println!("Response /wallet/deposit: {:?}", resp);
             }
         }
-        SubCommand::Withdrawal(withdrawal_sub) => match withdrawal_sub {
+        SubCommand::Withdrawal(ref withdrawal_sub) => match withdrawal_sub {
             WithdrawalSub::Btc(WithdrawalBtc{address, amount}) => {
-                client.auth = Some(KolliderAuth::new(&args.api_key, &args.api_secret, &args.password)?);
+                let auth = require_auth(&args)?;
+                client.auth = Some(auth);
                 let resp = client.wallet_withdrawal(&WithdrawalBody::Bitcoin {
                     _type: BtcTag::BTC,
-                    receive_address: address,
-                    amount
+                    receive_address: address.clone(),
+                    amount: *amount
                 }).await?;
                 println!("Response /wallet/withwallet_withdrawal: {:?}", resp);
             }
             WithdrawalSub::Ln(WithdrawalLn{invoice, amount}) => {
-                client.auth = Some(KolliderAuth::new(&args.api_key, &args.api_secret, &args.password)?);
+                let auth = require_auth(&args)?;
+                client.auth = Some(auth);
                 let resp = client.wallet_withdrawal(&WithdrawalBody::Lighting {
                     _type: LnTag::Ln,
-                    payment_request: invoice,
-                    amount
+                    payment_request: invoice.clone(),
+                    amount: *amount
                 }).await?;
                 println!("Response /wallet/withwallet_withdrawal: {:?}", resp);
             }

@@ -6,6 +6,8 @@ use crate::kollider::env::AuthError;
 pub enum Error {
     #[error("Reqwesting server error: {0}")]
     ReqwestErr(#[from] reqwest::Error),
+    #[error("Decoding from JSON error: {0}")]
+    DecodeErr(#[from] serde_json::Error),
     #[error("Launcher information file error: {0}")]
     ServerErr(#[from] KolliderError),
     #[error("You need authentificate to call {0}")]

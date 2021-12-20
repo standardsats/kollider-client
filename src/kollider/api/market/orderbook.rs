@@ -1,4 +1,4 @@
-use super::super::products::Symbol;
+use super::super::{products::Symbol, order::{OrderSide, MarginType, OrderType, SettlementType}};
 use serde::{
     de::{self, Deserializer},
     Deserialize,
@@ -111,27 +111,6 @@ pub struct OrderBookLevel2 {
     pub bids: HashMap<KeyPrice, u64>,
 }
 
-#[derive(Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
-pub enum MarginType {
-    Isolated,
-}
-
-#[derive(Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
-pub enum OrderType {
-    Limit,
-}
-
-#[derive(Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
-pub enum SettlementType {
-    Instant,
-    Delayed,
-}
-
-#[derive(Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
-pub enum OrderSide {
-    Ask,
-    Bid,
-}
 
 #[derive(Deserialize, Debug, PartialEq, Clone)]
 pub struct OrderBookLevel3 {
