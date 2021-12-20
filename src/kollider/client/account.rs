@@ -1,6 +1,6 @@
 use super::env::KolliderClient;
 use super::error::Result;
-use crate::kollider::api::account::{AccountInfo, DepositBody, DepositResp, WithdrawalBody};
+use crate::kollider::api::account::{AccountInfo, DepositBody, DepositResp, WithdrawalBody, WithdrawalResp};
 
 impl KolliderClient {
     /// GET endpoint `/user/account`
@@ -14,7 +14,7 @@ impl KolliderClient {
     }
 
     /// POST endpoint /wallet/withdrawal
-    pub async fn wallet_withdrawal(&self, body: &WithdrawalBody) -> Result<()> {
+    pub async fn wallet_withdrawal(&self, body: &WithdrawalBody) -> Result<WithdrawalResp> {
         self.post_request_auth( "/wallet/withdrawal", Some(body)).await
     }
 }

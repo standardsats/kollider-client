@@ -1,4 +1,4 @@
-use serde::{Serialize};
+use serde::{Serialize, Deserialize};
 
 /// Single value tag for tagging only one possible type of "Ln"
 #[derive(Serialize, Debug, PartialEq, PartialOrd, Clone)]
@@ -26,6 +26,35 @@ pub enum WithdrawalBody {
         #[serde(rename = "type")]
         _type: BtcTag,
         receive_address: String,
+        amount: u64,
+    }
+}
+
+#[derive(Serialize, Deserialize, Debug, PartialEq, PartialOrd, Clone)]
+pub enum WithdrawalNetwork {
+    Lightning,
+    Bitcoin,
+}
+
+#[derive(Serialize, Deserialize, Debug, PartialEq, PartialOrd, Clone)]
+pub enum WithdrawalStatus {
+    Complete
+}
+
+/// Response body for the /wallet/withdrawal
+#[derive(Deserialize, Debug, PartialEq, PartialOrd, Clone)]
+pub enum WithdrawalResp {
+    WithdrawalSuccess {
+        uid: u64,
+        receipt: String,
+        amount: u64,
+        network: WithdrawalNetwork,
+        status: WithdrawalStatus,
+        txid: String,
+    },
+    WithdrawalRejection {
+        uid: u64,
+        reason: String,
         amount: u64,
     }
 }
@@ -65,4 +94,59 @@ mod tests {
             r#"{"type":"BTC","receive_address":"bc1qhwqkf2emlvng5p2c5pvm8py0lfjjkk7atmhfk0","amount":100}"#
         );
     }
+
+    #[test]
+    fn test_withdrawal_resp_ln() {
+        let data = r#"
+        {
+            "WithdrawalSuccess": {
+                "uid": 7051,
+                "receipt": "Kollider Withdrawal",
+                "amount": 100,
+                "network": "Lightning",
+                "status": "Complete",
+                "txid": ""
+            }
+        }
+        "#;
+
+        let v: WithdrawalResp = serde_json::from_str(data).unwrap();
+
+        assert_eq!(
+            v,
+            WithdrawalResp::WithdrawalSuccess {
+                uid: 7051,
+                receipt: "Kollider Withdrawal".to_owned(),
+                amount: 100,
+                network: WithdrawalNetwork::Lightning,
+                status: WithdrawalStatus::Complete,
+                txid: "".to_owned(),
+             }
+        );
+    }
+
+    #[test]
+    fn test_withdrawal_resp_ln_fail() {
+        let data = r#"
+        {
+            "WithdrawalRejection": {
+                "uid": 7051,
+                "reason": "Insufficient Funds",
+                "amount": 100
+            }
+        }
+        "#;
+
+        let v: WithdrawalResp = serde_json::from_str(data).unwrap();
+
+        assert_eq!(
+            v,
+            WithdrawalResp::WithdrawalRejection {
+                uid: 7051,
+                reason: "Insufficient Funds".to_owned(),
+                amount: 100,
+             }
+        );
+    }
+
 }

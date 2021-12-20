@@ -35,18 +35,7 @@ mod tests {
 
         assert_eq!(
             v,
-            r#"
-            {
-                "symbol": "BTCUSD.PERP",
-                "quantity": 10,
-                "leverage": 100,
-                "side": "Bid",
-                "margin_type": "Isolated",
-                "order_type": "Limit",
-                "settlement_type": "Delayed",
-                "price": 100
-            }
-            "#
+            r#"{"symbol":"BTCUSD.PERP","quantity":10,"leverage":100,"side":"Bid","margin_type":"Isolated","order_type":"Limit","settlement_type":"Delayed","price":100}"#
         );
     }
 
