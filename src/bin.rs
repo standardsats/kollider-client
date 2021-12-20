@@ -10,6 +10,12 @@ use chrono::Duration;
 struct Args {
     #[clap(short, long)]
     testnet: bool,
+    #[clap(long, env = "KOLLIDER_API_KEY", hide_env_values = true)]
+    api_key: String,
+    #[clap(long, env = "KOLLIDER_API_SECRET", hide_env_values = true)]
+    api_secret: String,
+    #[clap(long, env = "KOLLIDER_API_PASSWORD", hide_env_values = true)]
+    password: String,
     #[clap(subcommand)]
     subcmd: SubCommand,
 }
@@ -22,7 +28,9 @@ enum SubCommand {
     History(HistoryCmd),
     Account(AccountCmd),
     #[clap(subcommand)]
-    Deposit(DepositSub)
+    Deposit(DepositSub),
+    #[clap(subcommand)]
+    Withdrawal(WithdrawalSub)
 }
 
 #[derive(Parser, Debug)]
@@ -55,42 +63,52 @@ struct HistoryCmd {
 
 #[derive(Parser, Debug)]
 struct AccountCmd {
-    #[clap(long, env = "KOLLIDER_API_KEY", hide_env_values = true)]
-    api_key: String,
-    #[clap(long, env = "KOLLIDER_API_SECRET", hide_env_values = true)]
-    api_secret: String,
-    #[clap(long, env = "KOLLIDER_API_PASSWORD", hide_env_values = true)]
-    password: String,
-}
 
+}
 
 #[derive(Parser, Debug)]
 enum DepositSub {
+    /// Deposit Bitcoins onchain. Non operational endpoint for now
     Btc(DepositBtc),
+    /// Deposit Bitcoins using Lightning Network. The method returns an invoice that you should pay with LN wallet as usual.
     Ln(DepositLn),
 }
 
 #[derive(Parser, Debug)]
 struct DepositBtc {
-    #[clap(long, env = "KOLLIDER_API_KEY", hide_env_values = true)]
-    api_key: String,
-    #[clap(long, env = "KOLLIDER_API_SECRET", hide_env_values = true)]
-    api_secret: String,
-    #[clap(long, env = "KOLLIDER_API_PASSWORD", hide_env_values = true)]
-    password: String,
+
 }
 
 #[derive(Parser, Debug)]
 struct DepositLn {
-    #[clap(long, env = "KOLLIDER_API_KEY", hide_env_values = true)]
-    api_key: String,
-    #[clap(long, env = "KOLLIDER_API_SECRET", hide_env_values = true)]
-    api_secret: String,
-    #[clap(long, env = "KOLLIDER_API_PASSWORD", hide_env_values = true)]
-    password: String,
     #[clap(long, help = "Amount of deposit in sats")]
     amount: u64,
 }
+
+#[derive(Parser, Debug)]
+enum WithdrawalSub {
+    /// Withdrawal of Bitcoins onchain
+    Btc(WithdrawalBtc),
+    /// Withdrawal of Bitcoins using Lightning Network.
+    Ln(WithdrawalLn),
+}
+
+#[derive(Parser, Debug)]
+struct WithdrawalBtc {
+    /// BTC receiving address
+    address: String,
+    #[clap(long, help = "Amount of withdrawal in sats")]
+    amount: u64,
+}
+
+#[derive(Parser, Debug)]
+struct WithdrawalLn {
+    /// Payment request
+    invoice: String,
+    #[clap(long, help = "Amount of withdrawal in sats")]
+    amount: u64,
+}
+
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
@@ -122,21 +140,41 @@ async fn main() -> Result<(), Box<dyn Error>> {
             let resp = client.market_historic_index_prices(limit, &symbol, start_time, end_time, interval).await?;
             println!("Response /market/historic_index_prices: {:?}", resp);
         }
-        SubCommand::Account(AccountCmd{api_key, api_secret, password}) => {
-            client.auth = Some(KolliderAuth::new(&api_key, &api_secret, &password)?);
+        SubCommand::Account(AccountCmd{}) => {
+            client.auth = Some(KolliderAuth::new(&args.api_key, &args.api_secret, &args.password)?);
             let resp = client.user_account().await?;
             println!("Response /user/account: {:?}", resp);
         }
         SubCommand::Deposit(deposit_sub) => match deposit_sub {
-            DepositSub::Btc(DepositBtc{api_key, api_secret, password}) => {
-                client.auth = Some(KolliderAuth::new(&api_key, &api_secret, &password)?);
+            DepositSub::Btc(DepositBtc{}) => {
+                client.auth = Some(KolliderAuth::new(&args.api_key, &args.api_secret, &args.password)?);
                 let resp = client.wallet_deposit(&DepositBody::Bitcoin).await?;
                 println!("Response /wallet/deposit: {:?}", resp);
             }
-            DepositSub::Ln(DepositLn{api_key, api_secret, password, amount}) => {
-                client.auth = Some(KolliderAuth::new(&api_key, &api_secret, &password)?);
+            DepositSub::Ln(DepositLn{amount}) => {
+                client.auth = Some(KolliderAuth::new(&args.api_key, &args.api_secret, &args.password)?);
                 let resp = client.wallet_deposit(&DepositBody::Lighting(amount)).await?;
                 println!("Response /wallet/deposit: {:?}", resp);
+            }
+        }
+        SubCommand::Withdrawal(withdrawal_sub) => match withdrawal_sub {
+            WithdrawalSub::Btc(WithdrawalBtc{address, amount}) => {
+                client.auth = Some(KolliderAuth::new(&args.api_key, &args.api_secret, &args.password)?);
+                let resp = client.wallet_withdrawal(&WithdrawalBody::Bitcoin {
+                    _type: BtcTag::BTC,
+                    receive_address: address,
+                    amount
+                }).await?;
+                println!("Response /wallet/withwallet_withdrawal: {:?}", resp);
+            }
+            WithdrawalSub::Ln(WithdrawalLn{invoice, amount}) => {
+                client.auth = Some(KolliderAuth::new(&args.api_key, &args.api_secret, &args.password)?);
+                let resp = client.wallet_withdrawal(&WithdrawalBody::Lighting {
+                    _type: LnTag::Ln,
+                    payment_request: invoice,
+                    amount
+                }).await?;
+                println!("Response /wallet/withwallet_withdrawal: {:?}", resp);
             }
         }
     }
