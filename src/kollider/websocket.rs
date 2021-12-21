@@ -3,7 +3,7 @@ use futures::{future, pin_mut, StreamExt};
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio_tungstenite::{connect_async, tungstenite::protocol::Message};
 
-pub const KOLLIDER_WEBSOCKET: &str = "wss://api.kollider.xyz/v1/ws";
+pub const KOLLIDER_WEBSOCKET: &str = "wss://api.kollider.xyz/v1/ws/";
 
 pub async fn kollider_websocket() {
     let url = url::Url::parse(KOLLIDER_WEBSOCKET).unwrap();

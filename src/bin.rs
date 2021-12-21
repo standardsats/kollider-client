@@ -2,6 +2,7 @@ use clap::Parser;
 use std::error::Error;
 use kollider_api::kollider::api::*;
 use kollider_api::kollider::client::*;
+use kollider_api::kollider::websocket::*;
 use chrono::prelude::*;
 use chrono::Duration;
 
@@ -413,7 +414,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
             }
             WebsocketSub::Public(WebsocketPublicCmd {}) => {
-
+                kollider_websocket().await;
             }
         }
     }
