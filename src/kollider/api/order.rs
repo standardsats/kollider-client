@@ -151,3 +151,14 @@ pub struct OrderDetails {
     // pub trigger_price_type: String, //: null,
     pub uid: u64, //: 1
 }
+
+#[derive(Deserialize, Debug, PartialEq, PartialOrd, Clone)]
+pub struct FillDetails {
+    #[serde(flatten)]
+    pub order: OrderDetails,
+    pub remaining: u64,
+    pub partial: bool,
+    pub is_maker: bool,
+    pub is_liquidation: bool,
+    pub is_selftrade: bool,
+}

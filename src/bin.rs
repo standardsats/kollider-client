@@ -151,6 +151,8 @@ enum OrderSub {
     List(OrderListCmd),
     /// List opened orders of the account
     Opened(OrderOpenedCmd),
+    /// List fill info about user orders
+    Fills(OrderFillsCmd),
 }
 
 #[derive(Parser, Debug)]
@@ -205,6 +207,24 @@ struct OrderOpenedCmd {
     api_secret: String,
     #[clap(long, env = "KOLLIDER_API_PASSWORD", hide_env_values = true)]
     password: String,
+}
+
+#[derive(Parser, Debug)]
+struct OrderFillsCmd {
+    #[clap(long, env = "KOLLIDER_API_KEY", hide_env_values = true)]
+    api_key: String,
+    #[clap(long, env = "KOLLIDER_API_SECRET", hide_env_values = true)]
+    api_secret: String,
+    #[clap(long, env = "KOLLIDER_API_PASSWORD", hide_env_values = true)]
+    password: String,
+    #[clap(long, default_value="BTCUSD.PERP")]
+    symbol: String,
+    #[clap(long)]
+    start: Option<DateTime<Local>>,
+    #[clap(long)]
+    end: Option<DateTime<Local>>,
+    #[clap(long, default_value="100")]
+    limit: usize,
 }
 
 #[tokio::main]
@@ -311,6 +331,14 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 client.auth = Some(auth);
                 let resp = client.open_orders().await?;
                 println!("Response /orders/opened: {:?}", resp);
+            }
+            OrderSub::Fills(OrderFillsCmd {api_key, api_secret, password, symbol, start, end, limit}) => {
+                let auth = KolliderAuth::new(&api_key, &api_secret, &password)?;
+                client.auth = Some(auth);
+                let start_time = start.unwrap_or_else(|| Local::now() - Duration::days(1));
+                let end_time = end.unwrap_or_else(|| Local::now());
+                let resp = client.fills(&symbol, start_time, end_time, limit).await?;
+                println!("Response /user/fills: {:?}", resp);
             }
         }
     }
