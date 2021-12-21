@@ -155,6 +155,8 @@ enum OrderSub {
     Fills(OrderFillsCmd),
     /// This will return all positions currently held by user.
     Positions(OrderPositionsCmd),
+    /// Cancel order with the best effort.
+    Cancel(OrderCancelCmd),
 }
 
 #[derive(Parser, Debug)]
@@ -237,6 +239,20 @@ struct OrderPositionsCmd {
     api_secret: String,
     #[clap(long, env = "KOLLIDER_API_PASSWORD", hide_env_values = true)]
     password: String,
+}
+
+#[derive(Parser, Debug)]
+struct OrderCancelCmd {
+    #[clap(long, env = "KOLLIDER_API_KEY", hide_env_values = true)]
+    api_key: String,
+    #[clap(long, env = "KOLLIDER_API_SECRET", hide_env_values = true)]
+    api_secret: String,
+    #[clap(long, env = "KOLLIDER_API_PASSWORD", hide_env_values = true)]
+    password: String,
+    #[clap(long, default_value="BTCUSD.PERP")]
+    symbol: String,
+    /// ID of order to cancel
+    order_id: String,
 }
 
 #[tokio::main]
@@ -357,6 +373,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 client.auth = Some(auth);
                 let resp = client.positions().await?;
                 println!("Response /positions: {:?}", resp);
+            }
+            OrderSub::Cancel(OrderCancelCmd {api_key, api_secret, password, symbol, order_id}) => {
+                let auth = KolliderAuth::new(&api_key, &api_secret, &password)?;
+                client.auth = Some(auth);
+                let resp = client.cancel_order(&symbol, &order_id).await?;
+                println!("Response /orders: {:?}", resp);
             }
         }
     }

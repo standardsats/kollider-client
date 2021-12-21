@@ -147,6 +147,31 @@ impl KolliderClient {
         let res: std::result::Result<R, KolliderError> = raw_res.into();
         Ok(res?)
     }
+
+    /// Helper to query DELETE request with authentification headers
+    pub async fn delete_request_auth<Q, R>(&self, path: &str, query_args: &Q) -> Result<R>
+    where
+        Q: serde::Serialize + ?Sized,
+        R: serde::de::DeserializeOwned,
+    {
+        let auth = self
+            .auth
+            .as_ref()
+            .ok_or_else(|| Error::AuthRequired(path.to_owned()))?;
+        let endpoint = format!("{}{}", self.server, path);
+
+        let raw_request = self.client.delete(endpoint).query(query_args);
+        let body: Option<()> = None;
+        let request = auth.inject_auth("DELETE", path, body, raw_request)?.build()?;
+        if log_enabled!(Level::Debug) {
+            debug!("Requesting DELETE URL {}", request.url());
+        }
+        let txt = self.client.execute(request).await?.text().await?;
+        debug!("Got response body {}", txt);
+        let raw_res: KolliderResult<R> = serde_json::from_str(&txt)?;
+        let res: std::result::Result<R, KolliderError> = raw_res.into();
+        Ok(res?)
+    }
 }
 
 impl Default for KolliderClient {

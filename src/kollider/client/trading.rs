@@ -38,4 +38,11 @@ impl KolliderClient {
     pub async fn positions(&self) -> Result<HashMap<Symbol, PositionDetails>> {
         self.get_request_auth_noargs("/positions").await
     }
+
+    pub async fn cancel_order(&self, symbol: &str, order_id: &str) -> Result<HashMap<Symbol, PositionDetails>> {
+        self.delete_request_auth("/orders", &[
+            ("symbol", format!("{}", symbol)),
+            ("order_id", format!("{}", order_id)),
+        ]).await
+    }
 }
