@@ -1,5 +1,5 @@
 use chrono::prelude::*;
-use crate::kollider::api::{OrderBody, OrderDetails, Symbol, FillDetails};
+use crate::kollider::api::{OrderBody, OrderDetails, Symbol, FillDetails, PositionDetails};
 use std::collections::HashMap;
 use super::env::KolliderClient;
 use super::error::Result;
@@ -33,5 +33,9 @@ impl KolliderClient {
             ("end", format!("{}", end.timestamp())),
             ("limit", format!("{}", limit)),
         ]).await
+    }
+
+    pub async fn positions(&self) -> Result<HashMap<Symbol, PositionDetails>> {
+        self.get_request_auth_noargs("/positions").await
     }
 }

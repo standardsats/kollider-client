@@ -153,6 +153,8 @@ enum OrderSub {
     Opened(OrderOpenedCmd),
     /// List fill info about user orders
     Fills(OrderFillsCmd),
+    /// This will return all positions currently held by user.
+    Positions(OrderPositionsCmd),
 }
 
 #[derive(Parser, Debug)]
@@ -225,6 +227,16 @@ struct OrderFillsCmd {
     end: Option<DateTime<Local>>,
     #[clap(long, default_value="100")]
     limit: usize,
+}
+
+#[derive(Parser, Debug)]
+struct OrderPositionsCmd {
+    #[clap(long, env = "KOLLIDER_API_KEY", hide_env_values = true)]
+    api_key: String,
+    #[clap(long, env = "KOLLIDER_API_SECRET", hide_env_values = true)]
+    api_secret: String,
+    #[clap(long, env = "KOLLIDER_API_PASSWORD", hide_env_values = true)]
+    password: String,
 }
 
 #[tokio::main]
@@ -339,6 +351,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 let end_time = end.unwrap_or_else(|| Local::now());
                 let resp = client.fills(&symbol, start_time, end_time, limit).await?;
                 println!("Response /user/fills: {:?}", resp);
+            }
+            OrderSub::Positions(OrderPositionsCmd {api_key, api_secret, password}) => {
+                let auth = KolliderAuth::new(&api_key, &api_secret, &password)?;
+                client.auth = Some(auth);
+                let resp = client.positions().await?;
+                println!("Response /positions: {:?}", resp);
             }
         }
     }
