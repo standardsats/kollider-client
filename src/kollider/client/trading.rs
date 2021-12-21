@@ -1,15 +1,15 @@
 use chrono::prelude::*;
-use crate::kollider::api::{OrderBody, OrderDetails, Symbol, FillDetails, PositionDetails};
+use crate::kollider::api::{OrderBody, OrderDetails, Symbol, FillDetails, PositionDetails, OrderPrediction, OrderCreated};
 use std::collections::HashMap;
 use super::env::KolliderClient;
 use super::error::Result;
 
 impl KolliderClient {
-    pub async fn create_order(&self, body: &OrderBody) -> Result<()> {
+    pub async fn create_order(&self, body: &OrderBody) -> Result<OrderCreated> {
         self.post_request_auth("/orders", Some(body)).await
     }
 
-    pub async fn order_prediction(&self, body: &OrderBody) -> Result<()> {
+    pub async fn order_prediction(&self, body: &OrderBody) -> Result<OrderPrediction> {
         self.post_request_auth("/orders/prediction", Some(body)).await
     }
 

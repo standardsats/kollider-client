@@ -5,14 +5,29 @@ use serde_aux::field_attributes::deserialize_number_from_string;
 /// Body of post /orders
 #[derive(Serialize, Debug, PartialEq, PartialOrd, Clone)]
 pub struct OrderBody {
-    pub symbol: Symbol,
-    pub quantity: u64,
-    pub leverage: u64,
-    pub side: OrderSide,
-    pub margin_type: MarginType,
-    pub order_type: OrderType,
-    pub settlement_type: SettlementType,
     pub price: u64,
+    pub order_type: OrderType,
+    pub side: OrderSide,
+    pub quantity: u64,
+    pub symbol: Symbol,
+    pub leverage: u64,
+    pub margin_type: MarginType,
+    pub settlement_type: SettlementType,
+}
+
+#[derive(Deserialize, Debug, PartialEq, PartialOrd, Clone)]
+pub struct OrderPrediction {
+    pub uid: u64,
+    pub ext_id: String,
+    #[serde(deserialize_with = "deserialize_number_from_string")]
+    pub margin_required: f64,
+    #[serde(deserialize_with = "deserialize_number_from_string")]
+    pub value: f64,
+    #[serde(deserialize_with = "deserialize_number_from_string")]
+    pub exchange_fee: f64,
+    #[serde(deserialize_with = "deserialize_number_from_string")]
+    pub estimated_liquidation_price: f64,
+    pub rejection_reason: Option<String>,
 }
 
 #[derive(Deserialize, Debug, PartialEq, PartialOrd, Clone)]
@@ -32,6 +47,19 @@ pub struct PositionDetails {
     #[serde(deserialize_with = "deserialize_number_from_string")]
     pub liq_price: f64,
     pub open_order_ids: Vec<String>,
+}
+
+#[derive(Deserialize, Debug, PartialEq, PartialOrd, Clone)]
+pub struct OrderCreated {
+    pub timestamp: u64,
+    pub order_id: u64,
+    pub ext_order_id: String,
+    pub uid: u64,
+    pub symbol: String,
+    pub quantity: u64,
+    pub order_type: OrderType,
+    pub price: u64,
+    pub leverage: u64,
 }
 
 #[cfg(test)]
@@ -56,7 +84,7 @@ mod tests {
 
         assert_eq!(
             v,
-            r#"{"symbol":"BTCUSD.PERP","quantity":10,"leverage":100,"side":"Bid","margin_type":"Isolated","order_type":"Limit","settlement_type":"Delayed","price":100}"#
+            r#"{"price":100,"order_type":"Limit","side":"Bid","quantity":10,"symbol":"BTCUSD.PERP","leverage":100,"margin_type":"Isolated","settlement_type":"Delayed"}"#
         );
     }
 
@@ -95,6 +123,68 @@ mod tests {
                     liq_price: 6788.3,
                     open_order_ids: vec![],
                 }
+            }
+        );
+    }
+
+    #[test]
+    fn test_order_prediction() {
+        let data = r#"
+        {
+            "uid": 7051,
+            "ext_id": "8c8b8062-d14b-4b14-a05b-84c92a32f4d3",
+            "margin_required": "2083.3333333333333333333300000",
+            "value": "2083.3333333333333333333300000",
+            "exchange_fee": "-0.5208333333333333333333325000",
+            "estimated_liquidation_price": "240782.54326561324303988018849",
+            "rejection_reason": "InstantLiquidation"
+        }"#;
+
+        let v: OrderPrediction = serde_json::from_str(data).unwrap();
+
+        assert_eq!(
+            v,
+            OrderPrediction {
+                uid: 7051,
+                ext_id: "8c8b8062-d14b-4b14-a05b-84c92a32f4d3".to_owned(),
+                margin_required: 2083.33333333333333333333,
+                value: 2083.33333333333333333333,
+                exchange_fee: -0.5208333333333333333333325,
+                estimated_liquidation_price: 240782.54326561324303988018849,
+                rejection_reason: Some("InstantLiquidation".to_owned()),
+            }
+        );
+    }
+
+    #[test]
+    fn test_order_created() {
+        let data = r#"
+        {
+            "timestamp": 1640100776001,
+            "order_id": 9640692,
+            "ext_order_id": "9eccb2e0-ff3d-4d72-a52d-00f662e325a9",
+            "uid": 7051,
+            "symbol": "BTCUSD.PERP",
+            "quantity": 1,
+            "order_type": "Limit",
+            "price": 485155,
+            "leverage": 1
+        }"#;
+
+        let v: OrderCreated = serde_json::from_str(data).unwrap();
+
+        assert_eq!(
+            v,
+            OrderCreated {
+                timestamp: 1640100776001,
+                order_id: 9640692,
+                ext_order_id: "9eccb2e0-ff3d-4d72-a52d-00f662e325a9".to_owned(),
+                uid: 7051,
+                symbol: "BTCUSD.PERP".to_owned(),
+                quantity: 1,
+                order_type: OrderType::Limit,
+                price: 485155,
+                leverage: 1,
             }
         );
     }
