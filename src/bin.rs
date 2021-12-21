@@ -34,7 +34,10 @@ enum SubCommand {
     Withdrawal(WithdrawalSub),
     /// Manipulate orderbook for given account. Requires authentification.
     #[clap(subcommand)]
-    Order(OrderSub)
+    Order(OrderSub),
+    /// Launch a websocket connection and enter iteractive shell.
+    #[clap(subcommand)]
+    Websocket(WebsocketSub),
 }
 
 #[derive(Parser, Debug)]
@@ -255,6 +258,30 @@ struct OrderCancelCmd {
     order_id: String,
 }
 
+
+#[derive(Parser, Debug)]
+enum WebsocketSub {
+    /// Launch websocket with auth info, so account related commands can be executed.
+    Private(WebsocketPrivateCmd),
+    /// Launch websocket without authentification
+    Public(WebsocketPublicCmd),
+}
+
+#[derive(Parser, Debug)]
+struct WebsocketPrivateCmd {
+    #[clap(long, env = "KOLLIDER_API_KEY", hide_env_values = true)]
+    api_key: String,
+    #[clap(long, env = "KOLLIDER_API_SECRET", hide_env_values = true)]
+    api_secret: String,
+    #[clap(long, env = "KOLLIDER_API_PASSWORD", hide_env_values = true)]
+    password: String,
+}
+
+#[derive(Parser, Debug)]
+struct WebsocketPublicCmd {
+
+}
+
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     let args = Args::parse();
@@ -379,6 +406,14 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 client.auth = Some(auth);
                 let resp = client.cancel_order(&symbol, &order_id).await?;
                 println!("Response /orders: {:?}", resp);
+            }
+        }
+        SubCommand::Websocket(ws_sub) => match ws_sub {
+            WebsocketSub::Private(WebsocketPrivateCmd {api_key, api_secret, password}) => {
+
+            }
+            WebsocketSub::Public(WebsocketPublicCmd {}) => {
+
             }
         }
     }
