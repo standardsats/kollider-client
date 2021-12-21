@@ -13,18 +13,12 @@ impl std::error::Error for KolliderError {}
 impl fmt::Display for KolliderError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match &self.error {
-            ErrorType::Simple(err) => write!(
-                f,
-                "Kollider error {}: {}",
-                err, self.msg
-            ),
-            ErrorType::Detailed{general_error} => write!(
-                f,
-                "Kollider general error {}: {}",
-                general_error, self.msg
-            ),
+            ErrorType::Simple(err) => write!(f, "Kollider error {}: {}", err, self.msg),
+            ErrorType::Detailed(derr) => match derr {
+                DetailedError::GeneralError(general_error) => write!(f, "Kollider general error {}: {}", general_error, self.msg),
+                DetailedError::AuthError(auth_error) => write!(f, "Kollider auth error {}: {}", auth_error, self.msg),
+            }
         }
-
     }
 }
 
@@ -32,10 +26,13 @@ impl fmt::Display for KolliderError {
 #[serde(untagged)]
 pub enum ErrorType {
     Simple(String),
-    Detailed {
-        #[serde(rename = "GeneralError")]
-        general_error: String,
-    }
+    Detailed(DetailedError),
+}
+
+#[derive(Deserialize, Debug, PartialEq, PartialOrd, Clone)]
+pub enum DetailedError {
+    GeneralError(String),
+    AuthError(String),
 }
 
 #[derive(Deserialize, Debug, PartialEq, PartialOrd, Clone)]
@@ -86,8 +83,25 @@ mod tests {
         assert_eq!(
             v,
             KolliderError {
-                error: ErrorType::Detailed { general_error: "Unauthorized".to_owned() },
+                error: ErrorType::Detailed(DetailedError::GeneralError("Unauthorized".to_owned())),
                 msg: "A general error has occured.".to_owned()
+            }
+        );
+    }
+
+    #[test]
+    fn test_wrong_signature_deserialize() {
+        let data = r#"
+        {"error":{"AuthError":"InvalidSignature"},"msg":"An auth error has occured."}
+        "#;
+
+        let v: KolliderError = serde_json::from_str(data).unwrap();
+
+        assert_eq!(
+            v,
+            KolliderError {
+                error: ErrorType::Detailed(DetailedError::AuthError("InvalidSignature".to_owned())),
+                msg: "An auth error has occured.".to_owned()
             }
         );
     }

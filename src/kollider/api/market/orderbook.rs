@@ -1,4 +1,4 @@
-use super::super::{products::Symbol, order::{OrderSide, MarginType, OrderType, SettlementType}};
+use super::super::{products::Symbol, order::{OrderDetails}};
 use serde::{
     de::{self, Deserializer},
     Deserialize,
@@ -118,28 +118,11 @@ pub struct OrderBookLevel3 {
     pub bids: Vec<(u64, Vec<OrderDetails>)>,
 }
 
-#[derive(Deserialize, Debug, PartialEq, PartialOrd, Clone)]
-pub struct OrderDetails {
-    // pub advanced_order_type: String, //: null,
-    pub ext_order_id: String,    //: "07e10e56-bd45-4e3c-9981-688e6af7fc69",
-    pub filled: f64,             //: 0,
-    pub leverage: u64,           //: 100,
-    pub margin_type: MarginType, //: "Isolated",
-    pub order_id: u64,           //: 9317213,
-    pub order_type: OrderType,   //: "Limit",
-    pub price: u64,              //: 486950,
-    pub quantity: u64,           //: 1016,
-    pub settlement_type: SettlementType, //: "Delayed",
-    pub side: OrderSide,         //: "Ask",
-    pub symbol: Symbol,          //: "BTCUSD.PERP",
-    pub timestamp: u64,          //: 0,
-    // pub trigger_price_type: String, //: null,
-    pub uid: u64, //: 1
-}
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use super::super::super::order::*;
 
     #[test]
     fn test_orderbook_level_2() {

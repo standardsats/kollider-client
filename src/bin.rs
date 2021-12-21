@@ -16,15 +16,25 @@ struct Args {
 
 #[derive(Parser, Debug)]
 enum SubCommand {
+    /// Print available tickers
     Products,
+    /// Get info from public orderbook
     Orderbook(OrderbookCmd),
+    /// Get info about given ticker symbol
     Ticker(TickerCmd),
+    /// Get historical data about prices (not operational)
     History(HistoryCmd),
+    /// Get information about an account. Requires authentification.
     Account(AccountCmd),
+    /// Deposit money to an account. Requires authentification.
     #[clap(subcommand)]
     Deposit(DepositSub),
+    /// Withdraw money from an account. Requires authentification.
     #[clap(subcommand)]
-    Withdrawal(WithdrawalSub)
+    Withdrawal(WithdrawalSub),
+    /// Manipulate orderbook for given account. Requires authentification.
+    #[clap(subcommand)]
+    Order(OrderSub)
 }
 
 #[derive(Parser, Debug)]
@@ -131,6 +141,71 @@ struct WithdrawalLn {
     amount: u64,
 }
 
+#[derive(Parser, Debug)]
+enum OrderSub {
+    /// Place new order in book
+    Create(OrderCreateCmd),
+    /// Preflight information for creating a new order
+    Prediction(OrderCreateCmd),
+    /// List historic info about orders of the account
+    List(OrderListCmd),
+    /// List opened orders of the account
+    Opened(OrderOpenedCmd),
+}
+
+#[derive(Parser, Debug)]
+struct OrderCreateCmd {
+    #[clap(long, env = "KOLLIDER_API_KEY", hide_env_values = true)]
+    api_key: String,
+    #[clap(long, env = "KOLLIDER_API_SECRET", hide_env_values = true)]
+    api_secret: String,
+    #[clap(long, env = "KOLLIDER_API_PASSWORD", hide_env_values = true)]
+    password: String,
+    #[clap(long, default_value="BTCUSD.PERP")]
+    symbol: String,
+    #[clap(long)]
+    quantity: u64,
+    #[clap(long)]
+    price: u64,
+    #[clap(long, default_value="1")]
+    leverage: u64,
+    #[clap(long)]
+    side: OrderSide,
+    #[clap(long, default_value="Isolated")]
+    margin_type: MarginType,
+    #[clap(long, default_value="Limit")]
+    order_type: OrderType,
+    #[clap(long, default_value="Delayed")]
+    settlement_type: SettlementType,
+}
+
+#[derive(Parser, Debug)]
+struct OrderListCmd {
+    #[clap(long, env = "KOLLIDER_API_KEY", hide_env_values = true)]
+    api_key: String,
+    #[clap(long, env = "KOLLIDER_API_SECRET", hide_env_values = true)]
+    api_secret: String,
+    #[clap(long, env = "KOLLIDER_API_PASSWORD", hide_env_values = true)]
+    password: String,
+    #[clap(long, default_value="BTCUSD.PERP")]
+    symbol: String,
+    #[clap(long)]
+    start: Option<DateTime<Local>>,
+    #[clap(long)]
+    end: Option<DateTime<Local>>,
+    #[clap(long, default_value="100")]
+    limit: usize,
+}
+
+#[derive(Parser, Debug)]
+struct OrderOpenedCmd {
+    #[clap(long, env = "KOLLIDER_API_KEY", hide_env_values = true)]
+    api_key: String,
+    #[clap(long, env = "KOLLIDER_API_SECRET", hide_env_values = true)]
+    api_secret: String,
+    #[clap(long, env = "KOLLIDER_API_PASSWORD", hide_env_values = true)]
+    password: String,
+}
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
@@ -204,6 +279,38 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     amount: *amount
                 }).await?;
                 println!("Response /wallet/withwallet_withdrawal: {:?}", resp);
+            }
+        }
+        SubCommand::Order(order_sub) => match order_sub {
+            OrderSub::Create(OrderCreateCmd {api_key, api_secret, password, symbol, quantity, price, leverage, side, margin_type, order_type, settlement_type}) => {
+                let auth = KolliderAuth::new(&api_key, &api_secret, &password)?;
+                client.auth = Some(auth);
+                let resp = client.create_order(&OrderBody {
+                    symbol, quantity, price, leverage, side, margin_type, order_type, settlement_type
+                }).await?;
+                println!("Response /orders: {:?}", resp);
+            }
+            OrderSub::Prediction(OrderCreateCmd {api_key, api_secret, password, symbol, quantity, price, leverage, side, margin_type, order_type, settlement_type}) => {
+                let auth = KolliderAuth::new(&api_key, &api_secret, &password)?;
+                client.auth = Some(auth);
+                let resp = client.order_prediction(&OrderBody {
+                    symbol, quantity, price, leverage, side, margin_type, order_type, settlement_type
+                }).await?;
+                println!("Response /orders/prediction: {:?}", resp);
+            }
+            OrderSub::List(OrderListCmd {api_key, api_secret, password, symbol, start, end, limit}) => {
+                let auth = KolliderAuth::new(&api_key, &api_secret, &password)?;
+                client.auth = Some(auth);
+                let start_time = start.unwrap_or_else(|| Local::now() - Duration::days(1));
+                let end_time = end.unwrap_or_else(|| Local::now());
+                let resp = client.orders(&symbol, start_time, end_time, limit).await?;
+                println!("Response /orders: {:?}", resp);
+            }
+            OrderSub::Opened(OrderOpenedCmd {api_key, api_secret, password}) => {
+                let auth = KolliderAuth::new(&api_key, &api_secret, &password)?;
+                client.auth = Some(auth);
+                let resp = client.open_orders().await?;
+                println!("Response /orders/opened: {:?}", resp);
             }
         }
     }

@@ -6,8 +6,8 @@ use log::*;
 use sha2::Sha256;
 use thiserror::Error;
 
-pub const KOLLIDER_MAINNET: &str = "https://api.kollider.xyz/v1/";
-pub const KOLLIDER_TESTNET: &str = "https://test.api.kollider.xyz/v1/";
+pub const KOLLIDER_MAINNET: &str = "https://api.kollider.xyz/v1";
+pub const KOLLIDER_TESTNET: &str = "https://test.api.kollider.xyz/v1";
 
 pub struct KolliderClient {
     pub client: reqwest::Client,
@@ -37,7 +37,31 @@ impl KolliderClient {
     }
 
     /// Helper to query GET request with authentification headers
-    pub async fn get_request_auth<T>(&self, path: &str) -> Result<T>
+    pub async fn get_request_auth<T, Q>(&self, path: &str, query_args: &Q) -> Result<T>
+    where
+        T: serde::de::DeserializeOwned,
+        Q: serde::Serialize + ?Sized,
+    {
+        let auth = self
+            .auth
+            .as_ref()
+            .ok_or_else(|| Error::AuthRequired(path.to_owned()))?;
+        let endpoint = format!("{}{}", self.server, path);
+        let body: Option<()> = None;
+
+        let request = auth
+            .inject_auth("GET", path, body, self.client.get(endpoint).query(query_args))?
+            .build()?;
+        debug!("Requesting GET URL {}", request.url());
+        let txt = self.client.execute(request).await?.text().await?;
+        debug!("Got response body {}", txt);
+        let raw_res: KolliderResult<T> = serde_json::from_str(&txt)?;
+        let res: std::result::Result<T, KolliderError> = raw_res.into();
+        Ok(res?)
+    }
+
+    /// Helper to query GET request with authentification headers
+    pub async fn get_request_auth_noargs<T>(&self, path: &str) -> Result<T>
     where
         T: serde::de::DeserializeOwned,
     {
@@ -58,6 +82,7 @@ impl KolliderClient {
         let res: std::result::Result<T, KolliderError> = raw_res.into();
         Ok(res?)
     }
+
 
     /// Helper to query GET request without auth
     pub async fn get_request<T, Q>(&self, path: &str, query_args: &Q) -> Result<T>
@@ -180,8 +205,10 @@ impl KolliderAuth {
             body_str.retain(|c| !c.is_whitespace());
             payload.extend(body_str.bytes());
         }
+        trace!("HMAC payload: {}", std::str::from_utf8(&payload).unwrap());
         mac.update(&payload);
         let signature = base64::encode(mac.finalize().into_bytes());
+        trace!("Signagure {}", signature);
 
         let mut headers = reqwest::header::HeaderMap::new();
         headers.insert("K-API-KEY", self.api_key.parse().unwrap());

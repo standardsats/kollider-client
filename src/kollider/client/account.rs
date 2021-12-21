@@ -5,7 +5,7 @@ use crate::kollider::api::account::{AccountInfo, DepositBody, DepositResp, Withd
 impl KolliderClient {
     /// GET endpoint `/user/account`
     pub async fn user_account(&self) -> Result<AccountInfo> {
-        self.get_request_auth("/user/account").await
+        self.get_request_auth_noargs("/user/account").await
     }
 
     /// POST endpoint /wallet/deposit
