@@ -414,7 +414,14 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
             }
             WebsocketSub::Public(WebsocketPublicCmd {}) => {
-                kollider_websocket().await;
+                let (stdin_tx, stdin_rx) = futures_channel::mpsc::unbounded();
+                stdin_tx.unbounded_send(KolliderMsg::Subscribe(SubscribeMsg {
+                    _type: SubscribeType::Subscribe,
+                    symbols: vec![".BTCUSD".to_owned()],
+                    channels: vec![ChannelName::IndexValues],
+                }))?;
+                tokio::spawn(websocket_stdin_controller(stdin_tx));
+                kollider_websocket(stdin_rx).await;
             }
         }
     }
