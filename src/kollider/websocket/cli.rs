@@ -26,11 +26,11 @@ fn subscribe(tx: &mut UnboundedSender<KolliderMsg>, args: Vec<String>) -> Result
     let symbol = args.get(1).ok_or_else(|| Box::new(MissingSybmol))?;
     let channel = ChannelName::from_str(args.get(2).ok_or_else(|| Box::new(MissingChannel))?)?;
 
-    let msg = KolliderMsg::Subscribe(SubscribeMsg {
-        _type: SubscribeType::Subscribe,
+    let msg = KolliderMsg::Subscribe{
+        _type: SubscribeTag::Tag,
         symbols: vec![symbol.clone()],
         channels: vec![channel.clone()],
-    });
+    };
     tx.unbounded_send(msg)?;
     Ok(())
 }

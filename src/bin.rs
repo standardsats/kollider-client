@@ -1,10 +1,11 @@
+use chrono::Duration;
+use chrono::prelude::*;
 use clap::Parser;
-use std::error::Error;
+use futures::StreamExt;
 use kollider_api::kollider::api::*;
 use kollider_api::kollider::client::*;
 use kollider_api::kollider::websocket::*;
-use chrono::prelude::*;
-use chrono::Duration;
+use std::error::Error;
 
 #[derive(Parser, Debug)]
 #[clap(about, version, author)]
@@ -280,7 +281,12 @@ struct WebsocketPrivateCmd {
 
 #[derive(Parser, Debug)]
 struct WebsocketPublicCmd {
-
+    /// Which symbol to filter from channels
+    #[clap(long, default_value=".BTCUSD")]
+    symbols: Vec<Symbol>,
+    /// Which channels to listen
+    #[clap(default_value="index_values")]
+    channels: Vec<ChannelName>,
 }
 
 #[tokio::main]
@@ -413,15 +419,19 @@ async fn main() -> Result<(), Box<dyn Error>> {
             WebsocketSub::Private(WebsocketPrivateCmd {api_key, api_secret, password}) => {
 
             }
-            WebsocketSub::Public(WebsocketPublicCmd {}) => {
+            WebsocketSub::Public(WebsocketPublicCmd {symbols, channels}) => {
                 let (stdin_tx, stdin_rx) = futures_channel::mpsc::unbounded();
-                stdin_tx.unbounded_send(KolliderMsg::Subscribe(SubscribeMsg {
-                    _type: SubscribeType::Subscribe,
-                    symbols: vec![".BTCUSD".to_owned()],
-                    channels: vec![ChannelName::IndexValues],
-                }))?;
-                tokio::spawn(websocket_stdin_controller(stdin_tx));
-                kollider_websocket(stdin_rx).await;
+                let (msg_sender, msg_receiver) = futures_channel::mpsc::unbounded();
+                stdin_tx.unbounded_send(KolliderMsg::Subscribe {
+                    _type : SubscribeTag::Tag,
+                    channels, symbols
+                })?;
+                // tokio::spawn(websocket_stdin_controller(stdin_tx));
+                tokio::spawn(kollider_websocket(stdin_rx, msg_sender));
+
+                msg_receiver.for_each(|message| async move {
+                    println!("Received message: {:?}", message);
+                }).await
             }
         }
     }

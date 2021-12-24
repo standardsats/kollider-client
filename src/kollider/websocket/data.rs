@@ -2,28 +2,40 @@ use serde::{Serialize, Deserialize};
 use crate::kollider::api::Symbol;
 use std::fmt;
 use std::str::FromStr;
+use serde_aux::field_attributes::deserialize_number_from_string;
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 #[serde(untagged)]
 pub enum KolliderMsg {
-    Subscribe(SubscribeMsg),
-    Unknown(serde_json::Value),
-}
-
-#[derive(Serialize, Deserialize, Debug, PartialEq, PartialOrd, Clone)]
-pub struct SubscribeMsg {
-    #[serde(rename = "type")]
-    pub _type: SubscribeType,
-    pub symbols: Vec<Symbol>,
-    pub channels: Vec<ChannelName>,
+    Subscribe {
+        #[serde(rename = "type")]
+        _type: SubscribeTag,
+        symbols: Vec<Symbol>,
+        channels: Vec<ChannelName>,
+    },
+    Unsubscribe {
+        #[serde(rename = "type")]
+        _type: UnsubscribeTag,
+        symbols: Vec<Symbol>,
+        channels: Vec<ChannelName>,
+    },
+    Tagged(KolliderTaggedMsg),
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
-pub enum SubscribeType {
-    #[serde(rename = "subscribe")]
-    Subscribe,
-    #[serde(rename = "unsubscribe")]
-    Unsubscribe,
+pub enum SubscribeTag { #[serde(rename = "subscribe")] Tag }
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
+pub enum UnsubscribeTag { #[serde(rename = "unsubscribe")] Tag }
+
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
+#[serde(rename_all = "lowercase", tag = "type", content = "data")]
+pub enum KolliderTaggedMsg {
+    #[serde(rename = "index_values")]
+    IndexValues(IndexValue),
+    #[serde(rename = "error")]
+    Error(String),
+    #[serde(rename = "success")]
+    Success(String),
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
@@ -71,4 +83,12 @@ impl FromStr for ChannelName {
             _ => Err(UnknownChannelName(s.to_owned())),
         }
     }
+}
+
+#[derive(Serialize, Deserialize, Debug, PartialEq, PartialOrd, Clone)]
+pub struct IndexValue {
+    pub denom: String,
+    pub symbol: Symbol,
+    #[serde(deserialize_with = "deserialize_number_from_string")]
+    pub value: f64,
 }
