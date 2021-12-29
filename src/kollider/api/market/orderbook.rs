@@ -1,6 +1,7 @@
 use super::super::{products::Symbol, order::{OrderDetails}};
 use serde::{
     de::{self, Deserializer},
+    Serialize,
     Deserialize,
 };
 use std::{collections::HashMap, str::FromStr};
@@ -93,7 +94,7 @@ pub enum OrderBook {
     Level3(OrderBookLevel3),
 }
 
-#[derive(Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
 #[serde(try_from = "String")]
 pub struct KeyPrice(u64);
 

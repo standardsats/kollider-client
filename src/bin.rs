@@ -282,7 +282,7 @@ struct WebsocketPrivateCmd {
 #[derive(Parser, Debug)]
 struct WebsocketPublicCmd {
     /// Which symbol to filter from channels
-    #[clap(long, default_value=".BTCUSD")]
+    #[clap(long, default_value="BTCUSD")]
     symbols: Vec<Symbol>,
     /// Which channels to listen
     #[clap(default_value="index_values")]

@@ -15,7 +15,11 @@ pub async fn kollider_websocket(msg_outcoming: UnboundedReceiver<KolliderMsg>, m
 
     let (write, read) = ws_stream.split();
 
-    let stdin_to_ws = msg_outcoming.map(|msg| Ok(Message::text(serde_json::to_string(&msg).unwrap())) ).forward(write);
+    let stdin_to_ws = msg_outcoming.map(|msg| {
+        let msg_str = serde_json::to_string(&msg).unwrap();
+        debug!("Sending WS message: {}", msg_str);
+        Ok(Message::text(msg_str))
+    }).forward(write);
     let ws_to_stdout = {
         read.try_for_each(|message| async {
             match message {

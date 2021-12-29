@@ -1,8 +1,9 @@
+use crate::kollider::api::{Symbol, KeyPrice};
+use serde_aux::field_attributes::deserialize_number_from_string;
 use serde::{Serialize, Deserialize};
-use crate::kollider::api::Symbol;
+use std::collections::HashMap;
 use std::fmt;
 use std::str::FromStr;
-use serde_aux::field_attributes::deserialize_number_from_string;
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 #[serde(untagged)]
@@ -36,6 +37,8 @@ pub enum KolliderTaggedMsg {
     Error(String),
     #[serde(rename = "success")]
     Success(String),
+    #[serde(rename = "level2state")]
+    OrderBookLevel2(OrderBookLevel2),
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
@@ -91,4 +94,21 @@ pub struct IndexValue {
     pub symbol: Symbol,
     #[serde(deserialize_with = "deserialize_number_from_string")]
     pub value: f64,
+}
+
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Copy)]
+pub enum UpdateType {
+    #[serde(rename = "delta")]
+    Delta,
+    #[serde(rename = "snapshot")]
+    Snapshot,
+}
+
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
+pub struct OrderBookLevel2 {
+    pub asks: HashMap<KeyPrice, u64>,
+    pub bids: HashMap<KeyPrice, u64>,
+    pub seq_number: u64,
+    pub symbol: Symbol,
+    pub update_type: UpdateType,
 }
