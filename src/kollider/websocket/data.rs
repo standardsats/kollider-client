@@ -1,4 +1,4 @@
-use crate::kollider::api::{KeyPrice, Symbol, OrderSide, MarginType, OrderType, SettlementType};
+use crate::kollider::api::{KeyPrice, MarginType, OrderSide, OrderType, SettlementType, Symbol};
 use chrono::prelude::*;
 use hmac::{Hmac, Mac};
 use log::*;
@@ -53,12 +53,12 @@ pub enum KolliderMsg {
         margin_type: MarginType,
         order_type: OrderType,
         settlement_type: SettlementType,
-        ext_order_id: Option<String>,
+        ext_order_id: String,
     },
     CancelOrder {
         #[serde(rename = "type")]
         _type: CancelOrderTag,
-        order_id: String,
+        order_id: u64,
         symbol: String,
         settlement_type: SettlementType,
     },
@@ -133,6 +133,9 @@ pub enum ErrorTag {
     Tag,
 }
 
+#[derive(Serialize, Deserialize, Debug, PartialEq, PartialOrd, Clone, Copy)]
+pub struct WrappedPrice(#[serde(deserialize_with = "deserialize_number_from_string")] f64);
+
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 #[serde(rename_all = "lowercase", tag = "type", content = "data")]
 pub enum KolliderTaggedMsg {
@@ -145,9 +148,128 @@ pub enum KolliderTaggedMsg {
     #[serde(rename = "level2state")]
     OrderBookLevel2(OrderBookLevel2),
     #[serde(rename = "authenticate")]
-    Authenticate {
-        message: String,
-    }
+    Authenticate { message: String },
+    #[serde(rename = "received")]
+    Received {
+        uid: u64,
+        order_id: u64,
+        price: u64,
+        quantity: u64,
+        symbol: Symbol,
+        leverage: u64,
+        order_type: OrderType,
+        ext_order_id: String,
+        timestamp: u64,
+    },
+    #[serde(rename = "balances")]
+    Balances {
+        #[serde(deserialize_with = "deserialize_number_from_string")]
+        cash: f64,
+        #[serde(deserialize_with = "deserialize_number_from_string")]
+        cross_margin: f64,
+        isolated_margin: HashMap<Symbol, WrappedPrice>,
+        order_margin: HashMap<Symbol, WrappedPrice>,
+    },
+    #[serde(rename = "open")]
+    Open {
+        order_id: u64,
+        price: u64,
+        quantity: u64,
+        symbol: Symbol,
+        leverage: u64,
+        side: OrderSide,
+        margin_type: MarginType,
+        order_type: OrderType,
+        settlement_type: SettlementType,
+        ext_order_id: String,
+        timestamp: u64,
+        filled: u64,
+    },
+    #[serde(rename = "user_advanced_orders")]
+    AdvancedOrders {
+        // TODO: {"orders":{}}
+    },
+    #[serde(rename = "open_orders")]
+    OpenOrders {
+        open_orders: HashMap<Symbol, Vec<OpenOrder>>,
+    },
+    #[serde(rename = "positions")]
+    Positions {
+        positions: HashMap<Symbol, Position>,
+    },
+    #[serde(rename = "withdrawal_limit_info")]
+    WithdrawalLimitInfo {
+        daily_withdrawal_limits: HashMap<String, u64>,
+        daily_withdrawal_volumes: HashMap<String, u64>,
+    },
+    #[serde(rename = "done")]
+    Done {
+        orde_type: OrderType, // TODO: Report typo
+        order_id: u64,
+        reason: String,
+        symbol: Symbol,
+        timestamp: u64,
+    },
+    #[serde(rename = "order_not_found")]
+    OrderNotFound {
+        order_id: u64,
+        symbol: Symbol,
+    },
+}
+
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
+pub struct OpenOrder {
+    // "advanced_order_type": null,
+    ext_order_id: String,
+    filled: u64,
+    leverage: u64,
+    margin_type: MarginType,
+    order_id: u64,
+    order_type: OrderType,
+    price: u64,
+    quantity: u64,
+    settlement_type: SettlementType,
+    side: OrderSide,
+    symbol: Symbol,
+    timestamp: u64,
+    // "trigger_price_type": null,
+    uid: u64,
+}
+
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
+pub struct Position {
+    #[serde(deserialize_with = "deserialize_number_from_string")]
+    adl_score: f64,
+    #[serde(deserialize_with = "deserialize_number_from_string")]
+    bankruptcy_price: f64,
+    #[serde(deserialize_with = "deserialize_number_from_string")]
+    entry_price: f64,
+    entry_time: Option<u64>,
+    #[serde(deserialize_with = "deserialize_number_from_string")]
+    entry_value: f64,
+    #[serde(deserialize_with = "deserialize_number_from_string")]
+    funding: f64,
+    is_liquidating: bool,
+    #[serde(deserialize_with = "deserialize_number_from_string")]
+    leverage: f64,
+    #[serde(deserialize_with = "deserialize_number_from_string")]
+    liq_price: f64,
+    #[serde(deserialize_with = "deserialize_number_from_string")]
+    mark_value: f64,
+    open_order_ids: Vec<u64>,
+    position_id: String,
+    #[serde(deserialize_with = "deserialize_number_from_string")]
+    quantity: f64,
+    #[serde(deserialize_with = "deserialize_number_from_string")]
+    real_leverage: f64,
+    #[serde(deserialize_with = "deserialize_number_from_string")]
+    rpnl: f64,
+    side: Option<OrderSide>,
+    symbol: Symbol,
+    timestamp: u64,
+    uid: u64,
+    #[serde(deserialize_with = "deserialize_number_from_string")]
+    upnl: f64,
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
@@ -255,4 +377,69 @@ pub fn make_user_auth(
         signature,
         timestamp,
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_open_orders_msg() {
+        let data = r#"
+        {
+            "data": {
+                "open_orders": {
+                    "BTCUSD.PERP": [
+                        {
+                            "advanced_order_type": null,
+                            "ext_order_id": "029893fe-dcd7-4c78-848c-ddf37468df94",
+                            "filled": 0,
+                            "leverage": 100,
+                            "margin_type": "Isolated",
+                            "order_id": 9951519,
+                            "order_type": "Limit",
+                            "price": 474500,
+                            "quantity": 1,
+                            "settlement_type": "Instant",
+                            "side": "Ask",
+                            "symbol": "BTCUSD.PERP",
+                            "timestamp": 0,
+                            "trigger_price_type": null,
+                            "uid": 7051
+                        }
+                    ]
+                }
+            },
+            "seq": 647,
+            "type": "open_orders"
+        }
+        "#;
+
+        let v: KolliderTaggedMsg = serde_json::from_str(data).unwrap();
+
+        assert_eq!(
+            v,
+            KolliderTaggedMsg::OpenOrders {
+                open_orders: hashmap! {
+                    "BTCUSD.PERP".to_owned() => vec![
+                        OpenOrder {
+                            ext_order_id: "029893fe-dcd7-4c78-848c-ddf37468df94".to_owned(),
+                            filled: 0,
+                            leverage: 100,
+                            margin_type: MarginType::Isolated,
+                            order_id: 9951519,
+                            order_type: OrderType::Limit,
+                            price: 474500,
+                            quantity: 1,
+                            settlement_type: SettlementType::Instant,
+                            side: OrderSide::Ask,
+                            symbol: "BTCUSD.PERP".to_owned(),
+                            timestamp: 0,
+                            uid: 7051,
+                        }
+                    ]
+                },
+            }
+        );
+    }
 }

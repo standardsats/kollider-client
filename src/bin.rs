@@ -6,6 +6,7 @@ use kollider_api::kollider::api::*;
 use kollider_api::kollider::client::*;
 use kollider_api::kollider::websocket::*;
 use std::error::Error;
+use uuid::Uuid;
 
 #[derive(Parser, Debug)]
 #[clap(about, version, author)]
@@ -307,7 +308,7 @@ enum WebsocketAction {
         settlement_type: SettlementType,
     },
     CancelOrder {
-        order_id: String,
+        order_id: u64,
         #[clap(long, default_value = "BTCUSD.PERP")]
         symbol: String,
         #[clap(long, default_value = "Delayed")]
@@ -344,7 +345,7 @@ impl WebsocketAction {
                 margin_type,
                 order_type,
                 settlement_type,
-                ext_order_id: None,
+                ext_order_id: Uuid::new_v4().to_hyphenated().encode_lower(&mut Uuid::encode_buffer()).to_owned(),
             },
             WebsocketAction::CancelOrder {
                 order_id,
