@@ -1,4 +1,4 @@
-use crate::kollider::api::{KeyPrice, Symbol};
+use crate::kollider::api::{KeyPrice, Symbol, OrderSide, MarginType, OrderType, SettlementType};
 use chrono::prelude::*;
 use hmac::{Hmac, Mac};
 use log::*;
@@ -37,6 +37,48 @@ pub enum KolliderMsg {
         /// Timestamp
         timestamp: String,
     },
+    Error {
+        #[serde(rename = "type")]
+        _type: ErrorTag,
+        message: String,
+    },
+    Order {
+        #[serde(rename = "type")]
+        _type: OrderTag,
+        price: u64,
+        quantity: u64,
+        symbol: Symbol,
+        leverage: u64,
+        side: OrderSide,
+        margin_type: MarginType,
+        order_type: OrderType,
+        settlement_type: SettlementType,
+        ext_order_id: Option<String>,
+    },
+    CancelOrder {
+        #[serde(rename = "type")]
+        _type: CancelOrderTag,
+        order_id: String,
+        symbol: String,
+        settlement_type: SettlementType,
+    },
+    FetchOpenOrders {
+        #[serde(rename = "type")]
+        _type: FetchOpenOrdersTag,
+    },
+    FetchPositions {
+        #[serde(rename = "type")]
+        _type: FetchPositionsTag,
+    },
+    GetTicker {
+        #[serde(rename = "type")]
+        _type: GetTickerTag,
+        symbol: String,
+    },
+    TradableProducts {
+        #[serde(rename = "type")]
+        _type: TradableProductsTag,
+    },
     Tagged(KolliderTaggedMsg),
 }
 
@@ -53,6 +95,41 @@ pub enum UnsubscribeTag {
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
 pub enum AuthenticateTag {
     #[serde(rename = "authenticate")]
+    Tag,
+}
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
+pub enum OrderTag {
+    #[serde(rename = "order")]
+    Tag,
+}
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
+pub enum CancelOrderTag {
+    #[serde(rename = "cancel_order")]
+    Tag,
+}
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
+pub enum FetchOpenOrdersTag {
+    #[serde(rename = "fetch_open_orders")]
+    Tag,
+}
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
+pub enum FetchPositionsTag {
+    #[serde(rename = "fetch_positions")]
+    Tag,
+}
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
+pub enum GetTickerTag {
+    #[serde(rename = "get_ticker")]
+    Tag,
+}
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
+pub enum TradableProductsTag {
+    #[serde(rename = "fetch_tradable_products")]
+    Tag,
+}
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
+pub enum ErrorTag {
+    #[serde(rename = "error")]
     Tag,
 }
 
