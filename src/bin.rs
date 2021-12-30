@@ -277,6 +277,12 @@ struct WebsocketPrivateCmd {
     api_secret: String,
     #[clap(long, env = "KOLLIDER_API_PASSWORD", hide_env_values = true)]
     password: String,
+    /// Which symbol to filter from channels
+    #[clap(long, default_value="BTCUSD")]
+    symbols: Vec<Symbol>,
+    /// Which channels to listen
+    #[clap(default_value="index_values")]
+    channels: Vec<ChannelName>,
 }
 
 #[derive(Parser, Debug)]
@@ -416,8 +422,22 @@ async fn main() -> Result<(), Box<dyn Error>> {
             }
         }
         SubCommand::Websocket(ws_sub) => match ws_sub {
-            WebsocketSub::Private(WebsocketPrivateCmd {api_key, api_secret, password}) => {
+            WebsocketSub::Private(WebsocketPrivateCmd {api_key, api_secret, password, symbols, channels}) => {
+                let (stdin_tx, stdin_rx) = futures_channel::mpsc::unbounded();
+                let (msg_sender, msg_receiver) = futures_channel::mpsc::unbounded();
+                let auth_msg = make_user_auth(&api_secret, &api_key, &password)?;
+                stdin_tx.unbounded_send(auth_msg)?;
+                stdin_tx.unbounded_send(KolliderMsg::Subscribe {
+                    _type : SubscribeTag::Tag,
+                    channels, symbols
+                })?;
 
+                // tokio::spawn(websocket_stdin_controller(stdin_tx));
+                tokio::spawn(kollider_websocket(stdin_rx, msg_sender));
+
+                msg_receiver.for_each(|message| async move {
+                    println!("Received message: {:?}", message);
+                }).await
             }
             WebsocketSub::Public(WebsocketPublicCmd {symbols, channels}) => {
                 let (stdin_tx, stdin_rx) = futures_channel::mpsc::unbounded();
