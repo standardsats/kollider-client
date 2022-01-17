@@ -5,7 +5,7 @@ pub enum Error {
     #[error("Failed to parse URL of Websocket: {0}")]
     UrlDecode(#[from] url::ParseError),
     #[error("Websocket operation error: {0}")]
-    SocketError(#[from] tungstenite::error::Error),
+    SocketError(#[from] tokio_tungstenite::tungstenite::Error),
 }
 
 /// Alias for a `Result` with the error type `self::Error`.

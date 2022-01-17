@@ -27,7 +27,7 @@ shellfish = { version = "0.6.0", features = ["rustyline", "async"]}
 thiserror = "1.0"
 tokio = { version = "1", features = ["full"], optional = true }
 tokio-tungstenite = { version = "0.16.1", features = ["native-tls"], optional = true }
-tungstenite = { version = "*", optional = true }
+# tungstenite = { version = "*", optional = true }
 url = "2.0.0"
 uuid = { version = "0.8.2", features = ["v4"]}
 
@@ -37,7 +37,7 @@ maplit = "1.0.2"
 [features]
 default = ["ws"]
 build-binary = ["env_logger", "tokio"]
-ws = ["tokio-tungstenite", "tungstenite", "tokio"]
+ws = ["tokio-tungstenite", "tokio"]
 openapi = [ "rweb" ]
 
 [lib]
