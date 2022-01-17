@@ -149,7 +149,7 @@ pub enum ErrorTag {
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, PartialOrd, Clone, Copy)]
 #[cfg_attr(feature = "openapi", derive(Schema))]
-pub struct WrappedPrice(#[serde(deserialize_with = "deserialize_number_from_string")] f64);
+pub struct WrappedPrice(#[serde(deserialize_with = "deserialize_number_from_string")] pub f64);
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 #[cfg_attr(feature = "openapi", derive(Schema))]
@@ -237,57 +237,57 @@ pub enum KolliderTaggedMsg {
 #[cfg_attr(feature = "openapi", derive(Schema))]
 pub struct OpenOrder {
     // "advanced_order_type": null,
-    ext_order_id: String,
-    filled: u64,
-    leverage: u64,
-    margin_type: MarginType,
-    order_id: u64,
-    order_type: OrderType,
-    price: u64,
-    quantity: u64,
-    settlement_type: SettlementType,
-    side: OrderSide,
-    symbol: Symbol,
-    timestamp: u64,
+    pub ext_order_id: String,
+    pub filled: u64,
+    pub leverage: u64,
+    pub margin_type: MarginType,
+    pub order_id: u64,
+    pub order_type: OrderType,
+    pub price: u64,
+    pub quantity: u64,
+    pub settlement_type: SettlementType,
+    pub side: OrderSide,
+    pub symbol: Symbol,
+    pub timestamp: u64,
     // "trigger_price_type": null,
-    uid: u64,
+    pub uid: u64,
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 #[cfg_attr(feature = "openapi", derive(Schema))]
 pub struct Position {
     #[serde(deserialize_with = "deserialize_number_from_string")]
-    adl_score: f64,
+    pub adl_score: f64,
     #[serde(deserialize_with = "deserialize_number_from_string")]
-    bankruptcy_price: f64,
+    pub bankruptcy_price: f64,
     #[serde(deserialize_with = "deserialize_number_from_string")]
-    entry_price: f64,
-    entry_time: Option<u64>,
+    pub entry_price: f64,
+    pub entry_time: Option<u64>,
     #[serde(deserialize_with = "deserialize_number_from_string")]
-    entry_value: f64,
+    pub entry_value: f64,
     #[serde(deserialize_with = "deserialize_number_from_string")]
-    funding: f64,
-    is_liquidating: bool,
+    pub funding: f64,
+    pub is_liquidating: bool,
     #[serde(deserialize_with = "deserialize_number_from_string")]
-    leverage: f64,
+    pub leverage: f64,
     #[serde(deserialize_with = "deserialize_number_from_string")]
-    liq_price: f64,
+    pub liq_price: f64,
     #[serde(deserialize_with = "deserialize_number_from_string")]
-    mark_value: f64,
-    open_order_ids: Vec<u64>,
-    position_id: String,
+    pub mark_value: f64,
+    pub open_order_ids: Vec<u64>,
+    pub position_id: String,
     #[serde(deserialize_with = "deserialize_number_from_string")]
-    quantity: f64,
+    pub quantity: f64,
     #[serde(deserialize_with = "deserialize_number_from_string")]
-    real_leverage: f64,
+    pub real_leverage: f64,
     #[serde(deserialize_with = "deserialize_number_from_string")]
-    rpnl: f64,
-    side: Option<OrderSide>,
-    symbol: Symbol,
-    timestamp: u64,
-    uid: u64,
+    pub rpnl: f64,
+    pub side: Option<OrderSide>,
+    pub symbol: Symbol,
+    pub timestamp: u64,
+    pub uid: u64,
     #[serde(deserialize_with = "deserialize_number_from_string")]
-    upnl: f64,
+    pub upnl: f64,
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
@@ -308,7 +308,7 @@ pub enum ChannelName {
 }
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
-pub struct UnknownChannelName(String);
+pub struct UnknownChannelName(pub String);
 
 impl std::error::Error for UnknownChannelName {}
 
