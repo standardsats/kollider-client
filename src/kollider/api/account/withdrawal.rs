@@ -1,19 +1,25 @@
 use serde::{Serialize, Deserialize};
 
+#[cfg(feature = "openapi")]
+use rweb::Schema;
+
 /// Single value tag for tagging only one possible type of "Ln"
 #[derive(Serialize, Debug, PartialEq, PartialOrd, Clone)]
+#[cfg_attr(feature = "openapi", derive(Schema))]
 pub enum LnTag {
     Ln
 }
 
 /// Single value tag for tagging only one possible type of "BTC"
 #[derive(Serialize, Debug, PartialEq, PartialOrd, Clone)]
+#[cfg_attr(feature = "openapi", derive(Schema))]
 pub enum BtcTag {
     BTC
 }
 
 /// Request body for the /wallet/withdrawal
 #[derive(Serialize, Debug, PartialEq, PartialOrd, Clone)]
+#[cfg_attr(feature = "openapi", derive(Schema))]
 #[serde(untagged)]
 pub enum WithdrawalBody {
     Lighting {
@@ -31,18 +37,21 @@ pub enum WithdrawalBody {
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, PartialOrd, Clone)]
+#[cfg_attr(feature = "openapi", derive(Schema))]
 pub enum WithdrawalNetwork {
     Lightning,
     Bitcoin,
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, PartialOrd, Clone)]
+#[cfg_attr(feature = "openapi", derive(Schema))]
 pub enum WithdrawalStatus {
     Complete
 }
 
 /// Response body for the /wallet/withdrawal
 #[derive(Deserialize, Debug, PartialEq, PartialOrd, Clone)]
+#[cfg_attr(feature = "openapi", derive(Schema))]
 pub enum WithdrawalResp {
     WithdrawalSuccess {
         uid: u64,

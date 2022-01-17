@@ -1,7 +1,11 @@
 use serde::{Deserialize, Serialize};
 
+#[cfg(feature = "openapi")]
+use rweb::Schema;
+
 /// Request body for the /wallet/deposit
 #[derive(Serialize, Debug, PartialEq, PartialOrd, Clone)]
+#[cfg_attr(feature = "openapi", derive(Schema))]
 #[serde(tag = "type", content = "amount")]
 pub enum DepositBody {
     #[serde(rename = "Ln")]
@@ -12,6 +16,7 @@ pub enum DepositBody {
 
 /// Response item of the /wallet/deposit
 #[derive(Deserialize, Debug, PartialEq, PartialOrd, Clone)]
+#[cfg_attr(feature = "openapi", derive(Schema))]
 #[serde(untagged)]
 pub enum DepositResp {
     Lightning {

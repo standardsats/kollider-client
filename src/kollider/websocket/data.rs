@@ -1,4 +1,4 @@
-use crate::kollider::api::{KeyPrice, MarginType, OrderSide, OrderType, SettlementType, Symbol};
+use crate::kollider::api::{MarginType, OrderSide, OrderType, SettlementType, Symbol};
 use chrono::prelude::*;
 use hmac::{Hmac, Mac};
 use log::*;
@@ -10,7 +10,11 @@ use std::fmt;
 use std::str::FromStr;
 use thiserror::Error;
 
+#[cfg(feature = "openapi")]
+use rweb::Schema;
+
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
+#[cfg_attr(feature = "openapi", derive(Schema))]
 #[serde(untagged)]
 pub enum KolliderMsg {
     Subscribe {
@@ -83,60 +87,72 @@ pub enum KolliderMsg {
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
+#[cfg_attr(feature = "openapi", derive(Schema))]
 pub enum SubscribeTag {
     #[serde(rename = "subscribe")]
     Tag,
 }
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
+#[cfg_attr(feature = "openapi", derive(Schema))]
 pub enum UnsubscribeTag {
     #[serde(rename = "unsubscribe")]
     Tag,
 }
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
+#[cfg_attr(feature = "openapi", derive(Schema))]
 pub enum AuthenticateTag {
     #[serde(rename = "authenticate")]
     Tag,
 }
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
+#[cfg_attr(feature = "openapi", derive(Schema))]
 pub enum OrderTag {
     #[serde(rename = "order")]
     Tag,
 }
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
+#[cfg_attr(feature = "openapi", derive(Schema))]
 pub enum CancelOrderTag {
     #[serde(rename = "cancel_order")]
     Tag,
 }
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
+#[cfg_attr(feature = "openapi", derive(Schema))]
 pub enum FetchOpenOrdersTag {
     #[serde(rename = "fetch_open_orders")]
     Tag,
 }
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
+#[cfg_attr(feature = "openapi", derive(Schema))]
 pub enum FetchPositionsTag {
     #[serde(rename = "fetch_positions")]
     Tag,
 }
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
+#[cfg_attr(feature = "openapi", derive(Schema))]
 pub enum GetTickerTag {
     #[serde(rename = "get_ticker")]
     Tag,
 }
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
+#[cfg_attr(feature = "openapi", derive(Schema))]
 pub enum TradableProductsTag {
     #[serde(rename = "fetch_tradable_products")]
     Tag,
 }
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
+#[cfg_attr(feature = "openapi", derive(Schema))]
 pub enum ErrorTag {
     #[serde(rename = "error")]
     Tag,
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, PartialOrd, Clone, Copy)]
+#[cfg_attr(feature = "openapi", derive(Schema))]
 pub struct WrappedPrice(#[serde(deserialize_with = "deserialize_number_from_string")] f64);
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
+#[cfg_attr(feature = "openapi", derive(Schema))]
 #[serde(rename_all = "lowercase", tag = "type", content = "data")]
 pub enum KolliderTaggedMsg {
     #[serde(rename = "index_values")]
@@ -218,6 +234,7 @@ pub enum KolliderTaggedMsg {
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
+#[cfg_attr(feature = "openapi", derive(Schema))]
 pub struct OpenOrder {
     // "advanced_order_type": null,
     ext_order_id: String,
@@ -237,6 +254,7 @@ pub struct OpenOrder {
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
+#[cfg_attr(feature = "openapi", derive(Schema))]
 pub struct Position {
     #[serde(deserialize_with = "deserialize_number_from_string")]
     adl_score: f64,
@@ -273,6 +291,7 @@ pub struct Position {
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
+#[cfg_attr(feature = "openapi", derive(Schema))]
 pub enum ChannelName {
     #[serde(rename = "index_values")]
     IndexValues,
@@ -320,6 +339,7 @@ impl FromStr for ChannelName {
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, PartialOrd, Clone)]
+#[cfg_attr(feature = "openapi", derive(Schema))]
 pub struct IndexValue {
     pub denom: String,
     pub symbol: Symbol,
@@ -328,6 +348,7 @@ pub struct IndexValue {
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Copy)]
+#[cfg_attr(feature = "openapi", derive(Schema))]
 pub enum UpdateType {
     #[serde(rename = "delta")]
     Delta,
@@ -336,9 +357,10 @@ pub enum UpdateType {
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
+#[cfg_attr(feature = "openapi", derive(Schema))]
 pub struct OrderBookLevel2 {
-    pub asks: HashMap<KeyPrice, u64>,
-    pub bids: HashMap<KeyPrice, u64>,
+    pub asks: HashMap<String, u64>,
+    pub bids: HashMap<String, u64>,
     pub seq_number: u64,
     pub symbol: Symbol,
     pub update_type: UpdateType,

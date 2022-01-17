@@ -3,8 +3,12 @@ use serde::{Deserialize, Serialize};
 use std::fmt;
 use std::str::FromStr;
 
+#[cfg(feature = "openapi")]
+use rweb::Schema;
+
 /// Time interval between points in time. 5m, 15m, 1h, 1d
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
+#[cfg_attr(feature = "openapi", derive(Schema))]
 pub enum IntervalSize {
     #[serde(rename = "5m")]
     FiveMin,
@@ -58,6 +62,7 @@ impl FromStr for IntervalSize {
 
 /// Response body of the /market/historic_index_prices
 #[derive(Deserialize, Debug, PartialEq, PartialOrd, Clone)]
+#[cfg_attr(feature = "openapi", derive(Schema))]
 pub struct HistoryResp {
     data: Vec<HistoryItem>,
     symbol: Symbol,
@@ -65,6 +70,7 @@ pub struct HistoryResp {
 
 /// Response item of the /market/historic_index_prices
 #[derive(Deserialize, Debug, PartialEq, PartialOrd, Clone)]
+#[cfg_attr(feature = "openapi", derive(Schema))]
 pub struct HistoryItem {
     max: Option<f64>,
     min: Option<f64>,

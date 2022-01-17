@@ -1,11 +1,15 @@
 use serde::{Deserialize, Serialize};
 use serde_aux::field_attributes::deserialize_number_from_string;
 
+#[cfg(feature = "openapi")]
+use rweb::Schema;
+
 /// Symbol type of the tickers and products. Ex: "BTCUSD.PERP" or ".XTBUSD"
 pub type Symbol = String;
 
 /// Response item of the /market/products
 #[derive(Deserialize, Serialize, Debug, PartialEq, PartialOrd, Clone)]
+#[cfg_attr(feature = "openapi", derive(Schema))]
 pub struct Product {
     pub symbol: Symbol,
     #[serde(deserialize_with = "deserialize_number_from_string")]

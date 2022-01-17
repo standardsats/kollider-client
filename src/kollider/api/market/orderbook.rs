@@ -94,22 +94,10 @@ pub enum OrderBook {
     Level3(OrderBookLevel3),
 }
 
-#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
-#[serde(try_from = "String")]
-pub struct KeyPrice(u64);
-
-impl std::convert::TryFrom<String> for KeyPrice {
-    type Error = std::num::ParseIntError;
-
-    fn try_from(value: String) -> Result<Self, Self::Error> {
-        Ok(KeyPrice(u64::from_str(&value)?))
-    }
-}
-
 #[derive(Deserialize, Debug, PartialEq, Clone)]
 pub struct OrderBookLevel2 {
-    pub asks: HashMap<KeyPrice, u64>,
-    pub bids: HashMap<KeyPrice, u64>,
+    pub asks: HashMap<String, u64>,
+    pub bids: HashMap<String, u64>,
 }
 
 
@@ -171,29 +159,29 @@ mod tests {
                 symbol: "BTCUSD.PERP".to_owned(),
                 book: OrderBook::Level2(OrderBookLevel2 {
                     asks: hashmap! {
-                        KeyPrice(486950) => 1016,
-                        KeyPrice(487195) => 1071,
-                        KeyPrice(487440) => 1126,
-                        KeyPrice(487680) => 1181,
-                        KeyPrice(487925) => 1236,
-                        KeyPrice(488170) => 1291,
-                        KeyPrice(488415) => 1346,
-                        KeyPrice(488725) => 1161,
-                        KeyPrice(499360) => 120,
-                        KeyPrice(515030) => 9,
-                        KeyPrice(517200) => 207,
-                        KeyPrice(517210) => 371
+                        "486950".to_owned() => 1016,
+                        "487195".to_owned() => 1071,
+                        "487440".to_owned() => 1126,
+                        "487680".to_owned() => 1181,
+                        "487925".to_owned() => 1236,
+                        "488170".to_owned() => 1291,
+                        "488415".to_owned() => 1346,
+                        "488725".to_owned() => 1161,
+                        "499360".to_owned() => 120,
+                        "515030".to_owned() => 9,
+                        "517200".to_owned() => 207,
+                        "517210".to_owned() => 371
                     },
                     bids: hashmap! {
-                        KeyPrice(400000) => 3,
-                        KeyPrice(485140) => 1401,
-                        KeyPrice(485380) => 1346,
-                        KeyPrice(485625) => 1291,
-                        KeyPrice(485870) => 1236,
-                        KeyPrice(486110) => 1181,
-                        KeyPrice(486355) => 1126,
-                        KeyPrice(486595) => 1071,
-                        KeyPrice(486840) => 1016
+                        "400000".to_owned() => 3,
+                        "485140".to_owned() => 1401,
+                        "485380".to_owned() => 1346,
+                        "485625".to_owned() => 1291,
+                        "485870".to_owned() => 1236,
+                        "486110".to_owned() => 1181,
+                        "486355".to_owned() => 1126,
+                        "486595".to_owned() => 1071,
+                        "486840".to_owned() => 1016
                     },
                 }),
             }

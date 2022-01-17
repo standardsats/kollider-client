@@ -2,8 +2,12 @@ use super::super::{products::Symbol, order::OrderSide};
 use serde::Deserialize;
 use serde_aux::field_attributes::deserialize_number_from_string;
 
+#[cfg(feature = "openapi")]
+use rweb::Schema;
+
 /// Response item of the /market/ticker
 #[derive(Deserialize, Debug, PartialEq, PartialOrd, Clone)]
+#[cfg_attr(feature = "openapi", derive(Schema))]
 pub struct Ticker {
     #[serde(deserialize_with = "deserialize_number_from_string")]
     best_ask: f64,

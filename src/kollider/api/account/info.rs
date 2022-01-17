@@ -1,7 +1,11 @@
 use serde::{Deserialize};
 
+#[cfg(feature = "openapi")]
+use rweb::Schema;
+
 /// Response item of the /user/account
 #[derive(Deserialize, Debug, PartialEq, PartialOrd, Clone)]
+#[cfg_attr(feature = "openapi", derive(Schema))]
 pub struct AccountInfo {
     created_at: AccountCreated,
     email: String,
@@ -12,6 +16,7 @@ pub struct AccountInfo {
 }
 
 #[derive(Deserialize, Debug, PartialEq, PartialOrd, Clone)]
+#[cfg_attr(feature = "openapi", derive(Schema))]
 pub struct AccountCreated {
     nanos_since_epoch: u64,
     secs_since_epoch: u64,

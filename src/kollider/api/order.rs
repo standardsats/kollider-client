@@ -1,8 +1,12 @@
-use serde::{Serialize, Deserialize};
-use std::{fmt, str::FromStr};
 use super::products::Symbol;
+use serde::{Deserialize, Serialize};
+use std::{fmt, str::FromStr};
+
+#[cfg(feature = "openapi")]
+use rweb::Schema;
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
+#[cfg_attr(feature = "openapi", derive(Schema))]
 pub enum MarginType {
     Isolated,
 }
@@ -34,6 +38,7 @@ impl FromStr for MarginType {
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
+#[cfg_attr(feature = "openapi", derive(Schema))]
 pub enum OrderType {
     Limit,
     Market,
@@ -67,6 +72,7 @@ impl FromStr for OrderType {
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
+#[cfg_attr(feature = "openapi", derive(Schema))]
 pub enum SettlementType {
     Instant,
     Delayed,
@@ -99,8 +105,8 @@ impl FromStr for SettlementType {
     }
 }
 
-
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
+#[cfg_attr(feature = "openapi", derive(Schema))]
 pub enum OrderSide {
     Ask,
     Bid,
@@ -134,6 +140,7 @@ impl FromStr for OrderSide {
 }
 
 #[derive(Deserialize, Debug, PartialEq, PartialOrd, Clone)]
+#[cfg_attr(feature = "openapi", derive(Schema))]
 pub struct OrderDetails {
     // pub advanced_order_type: String, //: null,
     pub ext_order_id: String,    //: "07e10e56-bd45-4e3c-9981-688e6af7fc69",
@@ -153,6 +160,7 @@ pub struct OrderDetails {
 }
 
 #[derive(Deserialize, Debug, PartialEq, PartialOrd, Clone)]
+#[cfg_attr(feature = "openapi", derive(Schema))]
 pub struct FillDetails {
     #[serde(flatten)]
     pub order: OrderDetails,
