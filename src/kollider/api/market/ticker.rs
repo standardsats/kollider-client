@@ -1,4 +1,4 @@
-use super::super::{products::Symbol, order::OrderSide};
+use super::super::{order::OrderSide, products::Symbol};
 use serde::Deserialize;
 use serde_aux::field_attributes::deserialize_number_from_string;
 
@@ -38,13 +38,16 @@ mod tests {
 
         let v: Ticker = serde_json::from_str(data).unwrap();
 
-        assert_eq!(v, Ticker {
-            best_ask: 47949.5,
-            best_bid: 47938.5,
-            last_price: 46490.0,
-            last_quantity: 100,
-            last_side: OrderSide::Bid,
-            symbol: "BTCUSD.PERP".to_owned(),
-        });
+        assert_eq!(
+            v,
+            Ticker {
+                best_ask: 47949.5,
+                best_bid: 47938.5,
+                last_price: 46490.0,
+                last_quantity: 100,
+                last_side: OrderSide::Bid,
+                symbol: "BTCUSD.PERP".to_owned(),
+            }
+        );
     }
 }

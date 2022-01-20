@@ -1,9 +1,9 @@
-use super::super::{products::Symbol, order::{OrderDetails}};
+use super::super::{order::OrderDetails, products::Symbol};
 use serde::{
     de::{self, Deserializer},
     Deserialize,
 };
-use std::{collections::HashMap};
+use std::collections::HashMap;
 
 /// Response item of the /market/orderbook
 #[derive(Debug, PartialEq, Clone)]
@@ -47,12 +47,12 @@ impl<'de> Deserialize<'de> for OrderBookResp {
             .ok_or_else(|| de::Error::missing_field("book"))?
             .clone();
         let book: OrderBook = match level {
-            OrderBookLevel::Level2 => OrderBook::Level2(
-                serde_json::from_value(book_value).map_err(de::Error::custom)?,
-            ),
-            OrderBookLevel::Level3 => OrderBook::Level3(
-                serde_json::from_value(book_value).map_err(de::Error::custom)?,
-            ),
+            OrderBookLevel::Level2 => {
+                OrderBook::Level2(serde_json::from_value(book_value).map_err(de::Error::custom)?)
+            }
+            OrderBookLevel::Level3 => {
+                OrderBook::Level3(serde_json::from_value(book_value).map_err(de::Error::custom)?)
+            }
         };
 
         Ok(OrderBookResp {
@@ -99,18 +99,16 @@ pub struct OrderBookLevel2 {
     pub bids: HashMap<String, u64>,
 }
 
-
 #[derive(Deserialize, Debug, PartialEq, Clone)]
 pub struct OrderBookLevel3 {
     pub asks: Vec<(u64, Vec<OrderDetails>)>,
     pub bids: Vec<(u64, Vec<OrderDetails>)>,
 }
 
-
 #[cfg(test)]
 mod tests {
-    use super::*;
     use super::super::super::order::*;
+    use super::*;
 
     #[test]
     fn test_orderbook_level_2() {

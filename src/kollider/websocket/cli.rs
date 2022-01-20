@@ -15,18 +15,24 @@ pub async fn websocket_stdin_controller(tx: UnboundedSender<KolliderMsg>) {
     // Add some commands
     shell.commands.insert(
         "subscribe",
-        Command::new("Subscribe to channel for symbol. Usage: subscribe <symbol> <channel>".to_owned(), subscribe),
+        Command::new(
+            "Subscribe to channel for symbol. Usage: subscribe <symbol> <channel>".to_owned(),
+            subscribe,
+        ),
     );
 
     // Run the shell
     shell.run_async().await.unwrap();
 }
 
-fn subscribe(tx: &mut UnboundedSender<KolliderMsg>, args: Vec<String>) -> Result<(), Box<dyn Error>> {
+fn subscribe(
+    tx: &mut UnboundedSender<KolliderMsg>,
+    args: Vec<String>,
+) -> Result<(), Box<dyn Error>> {
     let symbol = args.get(1).ok_or_else(|| Box::new(MissingSybmol))?;
     let channel = ChannelName::from_str(args.get(2).ok_or_else(|| Box::new(MissingChannel))?)?;
 
-    let msg = KolliderMsg::Subscribe{
+    let msg = KolliderMsg::Subscribe {
         _type: SubscribeTag::Tag,
         symbols: vec![symbol.clone()],
         channels: vec![channel],

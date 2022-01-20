@@ -1,6 +1,6 @@
-use thiserror::Error;
 use crate::kollider::api::error::KolliderError;
 use crate::kollider::env::AuthError;
+use thiserror::Error;
 
 #[derive(Error, Debug)]
 pub enum Error {

@@ -15,9 +15,13 @@ impl fmt::Display for KolliderError {
         match &self.error {
             ErrorType::Simple(err) => write!(f, "Kollider error {}: {}", err, self.msg),
             ErrorType::Detailed(derr) => match derr {
-                DetailedError::GeneralError(general_error) => write!(f, "Kollider general error {}: {}", general_error, self.msg),
-                DetailedError::AuthError(auth_error) => write!(f, "Kollider auth error {}: {}", auth_error, self.msg),
-            }
+                DetailedError::GeneralError(general_error) => {
+                    write!(f, "Kollider general error {}: {}", general_error, self.msg)
+                }
+                DetailedError::AuthError(auth_error) => {
+                    write!(f, "Kollider auth error {}: {}", auth_error, self.msg)
+                }
+            },
         }
     }
 }

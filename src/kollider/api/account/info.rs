@@ -1,4 +1,4 @@
-use serde::{Deserialize};
+use serde::Deserialize;
 
 #[cfg(feature = "openapi")]
 use rweb::Schema;
@@ -56,7 +56,7 @@ mod tests {
                 user_type: "lnuser".to_owned(),
                 username: "28c27121-36d7-3ad5-87d6-8352b28e90a6".to_owned(),
                 validated_email: false,
-             }
+            }
         );
     }
 }

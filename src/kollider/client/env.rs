@@ -50,7 +50,12 @@ impl KolliderClient {
         let body: Option<()> = None;
 
         let request = auth
-            .inject_auth("GET", path, body, self.client.get(endpoint).query(query_args))?
+            .inject_auth(
+                "GET",
+                path,
+                body,
+                self.client.get(endpoint).query(query_args),
+            )?
             .build()?;
         debug!("Requesting GET URL {}", request.url());
         let txt = self.client.execute(request).await?.text().await?;
@@ -82,7 +87,6 @@ impl KolliderClient {
         let res: std::result::Result<T, KolliderError> = raw_res.into();
         Ok(res?)
     }
-
 
     /// Helper to query GET request without auth
     pub async fn get_request<T, Q>(&self, path: &str, query_args: &Q) -> Result<T>
@@ -162,7 +166,9 @@ impl KolliderClient {
 
         let raw_request = self.client.delete(endpoint).query(query_args);
         let body: Option<()> = None;
-        let request = auth.inject_auth("DELETE", path, body, raw_request)?.build()?;
+        let request = auth
+            .inject_auth("DELETE", path, body, raw_request)?
+            .build()?;
         if log_enabled!(Level::Debug) {
             debug!("Requesting DELETE URL {}", request.url());
         }

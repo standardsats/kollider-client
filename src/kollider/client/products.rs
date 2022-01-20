@@ -1,7 +1,7 @@
-use crate::kollider::api::products::{Product, Symbol};
-use std::collections::HashMap;
 use super::env::KolliderClient;
 use super::error::Result;
+use crate::kollider::api::products::{Product, Symbol};
+use std::collections::HashMap;
 
 impl KolliderClient {
     /// GET endpoint `/market/api`

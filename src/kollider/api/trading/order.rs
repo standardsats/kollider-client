@@ -1,5 +1,8 @@
+use super::super::{
+    order::{MarginType, OrderSide, OrderType, SettlementType},
+    products::Symbol,
+};
 use serde::{Deserialize, Serialize};
-use super::super::{products::Symbol, order::{OrderSide, MarginType, OrderType, SettlementType}};
 use serde_aux::field_attributes::deserialize_number_from_string;
 
 /// Body of post /orders
@@ -189,4 +192,3 @@ mod tests {
         );
     }
 }
-

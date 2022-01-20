@@ -1,4 +1,4 @@
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
 #[cfg(feature = "openapi")]
 use rweb::Schema;
@@ -7,14 +7,14 @@ use rweb::Schema;
 #[derive(Serialize, Debug, PartialEq, PartialOrd, Clone)]
 #[cfg_attr(feature = "openapi", derive(Schema))]
 pub enum LnTag {
-    Ln
+    Ln,
 }
 
 /// Single value tag for tagging only one possible type of "BTC"
 #[derive(Serialize, Debug, PartialEq, PartialOrd, Clone)]
 #[cfg_attr(feature = "openapi", derive(Schema))]
 pub enum BtcTag {
-    BTC
+    BTC,
 }
 
 /// Request body for the /wallet/withdrawal
@@ -33,7 +33,7 @@ pub enum WithdrawalBody {
         _type: BtcTag,
         receive_address: String,
         amount: u64,
-    }
+    },
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, PartialOrd, Clone)]
@@ -46,7 +46,7 @@ pub enum WithdrawalNetwork {
 #[derive(Serialize, Deserialize, Debug, PartialEq, PartialOrd, Clone)]
 #[cfg_attr(feature = "openapi", derive(Schema))]
 pub enum WithdrawalStatus {
-    Complete
+    Complete,
 }
 
 /// Response body for the /wallet/withdrawal
@@ -65,7 +65,7 @@ pub enum WithdrawalResp {
         uid: u64,
         reason: String,
         amount: u64,
-    }
+    },
 }
 
 #[cfg(test)]
@@ -130,7 +130,7 @@ mod tests {
                 network: WithdrawalNetwork::Lightning,
                 status: WithdrawalStatus::Complete,
                 txid: "".to_owned(),
-             }
+            }
         );
     }
 
@@ -154,8 +154,7 @@ mod tests {
                 uid: 7051,
                 reason: "Insufficient Funds".to_owned(),
                 amount: 100,
-             }
+            }
         );
     }
-
 }

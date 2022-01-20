@@ -286,9 +286,7 @@ pub enum KolliderTaggedMsg {
         symbol: Symbol,
     },
     #[serde(rename = "change_leverage_success")]
-    ChangeLeverageSuccess {
-        symbol: Symbol,
-    }
+    ChangeLeverageSuccess { symbol: Symbol },
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]

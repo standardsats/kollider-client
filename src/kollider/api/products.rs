@@ -73,7 +73,7 @@ mod tests {
 
         assert_eq!(
             v,
-            hashmap!{
+            hashmap! {
                 "BTCUSD.PERP".to_owned() => Product {
                     symbol: "BTCUSD.PERP".to_owned(),
                     contract_size: 1.0,

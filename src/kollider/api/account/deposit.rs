@@ -19,12 +19,8 @@ pub enum DepositBody {
 #[cfg_attr(feature = "openapi", derive(Schema))]
 #[serde(untagged)]
 pub enum DepositResp {
-    Lightning {
-        payment_request: String,
-    },
-    Bitcoin {
-        receive_address: String,
-    }
+    Lightning { payment_request: String },
+    Bitcoin { receive_address: String },
 }
 
 #[cfg(test)]
@@ -37,10 +33,7 @@ mod tests {
 
         let v: String = serde_json::to_string(&data).unwrap();
 
-        assert_eq!(
-            v,
-            r#"{"type":"Ln","amount":142}"#
-        );
+        assert_eq!(v, r#"{"type":"Ln","amount":142}"#);
     }
 
     #[test]
@@ -49,10 +42,7 @@ mod tests {
 
         let v: String = serde_json::to_string(&data).unwrap();
 
-        assert_eq!(
-            v,
-            r#"{"type":"BTC"}"#
-        );
+        assert_eq!(v, r#"{"type":"BTC"}"#);
     }
 
     #[test]
@@ -87,7 +77,7 @@ mod tests {
             v,
             DepositResp::Bitcoin {
                 receive_address: "bc1qhwqkf2emlvng5p2c5pvm8py0lfjjkk7atmhfk0".to_owned(),
-             }
+            }
         );
     }
 }

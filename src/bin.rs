@@ -345,7 +345,10 @@ impl WebsocketAction {
                 margin_type,
                 order_type,
                 settlement_type,
-                ext_order_id: Uuid::new_v4().to_hyphenated().encode_lower(&mut Uuid::encode_buffer()).to_owned(),
+                ext_order_id: Uuid::new_v4()
+                    .to_hyphenated()
+                    .encode_lower(&mut Uuid::encode_buffer())
+                    .to_owned(),
             },
             WebsocketAction::CancelOrder {
                 order_id,
