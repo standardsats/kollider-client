@@ -147,10 +147,10 @@ mod tests {
             OrderPrediction {
                 uid: 7051,
                 ext_id: "8c8b8062-d14b-4b14-a05b-84c92a32f4d3".to_owned(),
-                margin_required: 2083.33333333333333333333,
-                value: 2083.33333333333333333333,
-                exchange_fee: -0.5208333333333333333333325,
-                estimated_liquidation_price: 240782.54326561324303988018849,
+                margin_required: 2083.3333333333335,
+                value: 2083.3333333333335,
+                exchange_fee: -0.5208333333333334,
+                estimated_liquidation_price: 240782.54326561323,
                 rejection_reason: Some("InstantLiquidation".to_owned()),
             }
         );

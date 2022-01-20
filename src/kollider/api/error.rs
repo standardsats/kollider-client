@@ -42,9 +42,9 @@ pub enum KolliderResult<T> {
     Ok(T),
 }
 
-impl<T> Into<Result<T, KolliderError>> for KolliderResult<T> {
-    fn into(self) -> Result<T, KolliderError> {
-        match self {
+impl<T> From<KolliderResult<T>> for Result<T, KolliderError> {
+    fn from(val: KolliderResult<T>) -> Result<T, KolliderError> {
+        match val {
             KolliderResult::Err(e) => Err(e),
             KolliderResult::Ok(v) => Ok(v),
         }

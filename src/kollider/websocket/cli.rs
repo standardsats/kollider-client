@@ -29,7 +29,7 @@ fn subscribe(tx: &mut UnboundedSender<KolliderMsg>, args: Vec<String>) -> Result
     let msg = KolliderMsg::Subscribe{
         _type: SubscribeTag::Tag,
         symbols: vec![symbol.clone()],
-        channels: vec![channel.clone()],
+        channels: vec![channel],
     };
     tx.unbounded_send(msg)?;
     Ok(())

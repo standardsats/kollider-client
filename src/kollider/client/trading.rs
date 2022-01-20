@@ -15,7 +15,7 @@ impl KolliderClient {
 
     pub async fn orders(&self, symbol: &str, start: DateTime<Local>, end: DateTime<Local>, limit: usize) -> Result<Vec<OrderDetails>> {
         self.get_request_auth("/orders", &[
-            ("symbol", format!("{}", symbol)),
+            ("symbol", symbol.to_owned()),
             ("start", format!("{}", start.timestamp())),
             ("end", format!("{}", end.timestamp())),
             ("limit", format!("{}", limit)),
@@ -28,7 +28,7 @@ impl KolliderClient {
 
     pub async fn fills(&self, symbol: &str, start: DateTime<Local>, end: DateTime<Local>, limit: usize) -> Result<Vec<FillDetails>> {
         self.get_request_auth("/user/fills", &[
-            ("symbol", format!("{}", symbol)),
+            ("symbol", symbol.to_owned()),
             ("start", format!("{}", start.timestamp())),
             ("end", format!("{}", end.timestamp())),
             ("limit", format!("{}", limit)),
@@ -41,8 +41,8 @@ impl KolliderClient {
 
     pub async fn cancel_order(&self, symbol: &str, order_id: &str) -> Result<HashMap<Symbol, PositionDetails>> {
         self.delete_request_auth("/orders", &[
-            ("symbol", format!("{}", symbol)),
-            ("order_id", format!("{}", order_id)),
+            ("symbol", symbol.to_owned()),
+            ("order_id", order_id.to_owned()),
         ]).await
     }
 }

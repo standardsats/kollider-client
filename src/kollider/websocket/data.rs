@@ -3,7 +3,9 @@ use chrono::prelude::*;
 use hmac::{Hmac, Mac};
 use log::*;
 use serde::{Deserialize, Serialize};
-use serde_aux::field_attributes::deserialize_number_from_string;
+use serde_aux::field_attributes::{
+    deserialize_number_from_string, deserialize_option_number_from_string,
+};
 use sha2::Sha256;
 use std::collections::HashMap;
 use std::fmt;
@@ -227,10 +229,66 @@ pub enum KolliderTaggedMsg {
         timestamp: u64,
     },
     #[serde(rename = "order_not_found")]
-    OrderNotFound {
+    OrderNotFound { order_id: u64, symbol: Symbol },
+    Fill {
+        ext_order_id: String,
+        is_maker: bool,
+        is_selftrade: bool,
+        leverage: u64,
+        margin_type: MarginType,
         order_id: u64,
+        partial: bool,
+        price: u64,
+        quantity: u64,
+        side: OrderSide,
+        symbol: String,
+        user_id: u64,
+    },
+    #[serde(rename = "trade")]
+    Trade {
+        #[serde(deserialize_with = "deserialize_number_from_string")]
+        fees: f64,
+        is_liquidation: bool,
+        is_maker: bool,
+        #[serde(deserialize_with = "deserialize_number_from_string")]
+        leverage: f64,
+        margin_type: MarginType,
+        order_id: u64,
+        #[serde(deserialize_with = "deserialize_number_from_string")]
+        price: f64,
+        #[serde(deserialize_with = "deserialize_number_from_string")]
+        quantity: u64,
+        #[serde(deserialize_with = "deserialize_number_from_string")]
+        rpnl: f64,
+        settlement_type: SettlementType,
+        side: OrderSide,
+        symbol: String,
+        timestamp: u64,
+    },
+    #[serde(rename = "settlement_request")]
+    SettlementRequest {
+        #[serde(deserialize_with = "deserialize_number_from_string")]
+        amount: u64,
+        lnurl: String,
+        request_id: String,
+        side: OrderSide,
         symbol: Symbol,
     },
+    #[serde(rename = "change_leverage_info")]
+    ChangeLeverageInfo {
+        error: Option<String>,
+        #[serde(deserialize_with = "deserialize_option_number_from_string")]
+        liquidation_price: Option<f64>,
+        #[serde(deserialize_with = "deserialize_number_from_string")]
+        order_margin: f64,
+        #[serde(deserialize_with = "deserialize_number_from_string")]
+        position_margin: f64,
+        symbol: Symbol,
+    },
+    #[serde(rename = "change_leverage_success")]
+    ChangeLeverageSuccess {
+        symbol: Symbol,
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
@@ -461,6 +519,179 @@ mod tests {
                         }
                     ]
                 },
+            }
+        );
+    }
+
+    #[test]
+    fn test_fill_msg() {
+        let data = r#"
+        {
+            "data": {
+                "ext_order_id": "200f3530-473f-4ee6-8b56-c194c4ec8776",
+                "is_maker": false,
+                "is_selftrade": false,
+                "leverage": 100,
+                "margin_type": "Isolated",
+                "order_id": 14792108,
+                "partial": false,
+                "price": 419005,
+                "quantity": 1,
+                "side": "Bid",
+                "symbol": "BTCUSD.PERP",
+                "user_id": 7051
+            },
+            "seq": 10379,
+            "type": "fill"
+        }
+        "#;
+
+        let v: KolliderTaggedMsg = serde_json::from_str(data).unwrap();
+
+        assert_eq!(
+            v,
+            KolliderTaggedMsg::Fill {
+                ext_order_id: "200f3530-473f-4ee6-8b56-c194c4ec8776".to_owned(),
+                is_maker: false,
+                is_selftrade: false,
+                leverage: 100,
+                margin_type: MarginType::Isolated,
+                order_id: 14792108,
+                partial: false,
+                price: 419005,
+                quantity: 1,
+                side: OrderSide::Bid,
+                symbol: "BTCUSD.PERP".to_owned(),
+                user_id: 7051,
+            }
+        );
+    }
+
+    #[test]
+    fn test_trade_msg() {
+        let data = r#"
+        {
+            "data": {
+                "fees": "1.7899547738093817496211250000",
+                "is_liquidation": false,
+                "is_maker": false,
+                "leverage": "1.00",
+                "margin_type": "Isolated",
+                "order_id": 14792108,
+                "order_type": "Market",
+                "price": "41900.5",
+                "quantity": "1",
+                "rpnl": "0",
+                "settlement_type": "Delayed",
+                "side": "Bid",
+                "symbol": "BTCUSD.PERP",
+                "timestamp": 1642633795546
+            },
+            "seq": 10380,
+            "type": "trade"
+        }
+        "#;
+
+        let v: KolliderTaggedMsg = serde_json::from_str(data).unwrap();
+
+        assert_eq!(
+            v,
+            KolliderTaggedMsg::Trade {
+                fees: 1.7899547738093817,
+                is_liquidation: false,
+                is_maker: false,
+                leverage: 1.00,
+                margin_type: MarginType::Isolated,
+                order_id: 14792108,
+                price: 41900.5,
+                quantity: 1,
+                rpnl: 0.0,
+                settlement_type: SettlementType::Delayed,
+                side: OrderSide::Bid,
+                symbol: "BTCUSD.PERP".to_owned(),
+                timestamp: 1642633795546,
+            }
+        );
+    }
+
+    #[test]
+    fn test_settlement_request_msg() {
+        let data = r#"
+        {
+            "data": {
+                "amount": "4766",
+                "lnurl": "lnurl1dp68gurn8ghj7ctsdyhxkmmvd35kgetj9eu8j730wccj7mrfva58gmnfdenj7amfw35xgunpwaskchmjv4ch2etnwslhz0txxv6x2vfjvycz6d3ex5uj6dpkvv6j6c34vsuz6dfnx43rqvf5vgmrgvrpyqsrm9",
+                "request_id": "f34e12a0-6959-46c5-b5d8-535b014b640a",
+                "side": "Ask",
+                "symbol": "BTCUSD.PERP"
+            },
+            "seq": 11053,
+            "type": "settlement_request"
+        }
+        "#;
+
+        let v: KolliderTaggedMsg = serde_json::from_str(data).unwrap();
+
+        assert_eq!(
+            v,
+            KolliderTaggedMsg::SettlementRequest {
+                amount: 4766,
+                lnurl: "lnurl1dp68gurn8ghj7ctsdyhxkmmvd35kgetj9eu8j730wccj7mrfva58gmnfdenj7amfw35xgunpwaskchmjv4ch2etnwslhz0txxv6x2vfjvycz6d3ex5uj6dpkvv6j6c34vsuz6dfnx43rqvf5vgmrgvrpyqsrm9".to_owned(),
+                request_id: "f34e12a0-6959-46c5-b5d8-535b014b640a".to_owned(),
+                side: OrderSide::Ask,
+                symbol: "BTCUSD.PERP".to_owned(),
+            }
+        );
+    }
+
+    #[test]
+    fn test_change_leverage_info_msg_01() {
+        let data = r#"
+        {
+            "data": {
+                "error": null,
+                "liquidation_price": null,
+                "order_margin": "1000.000",
+                "position_margin": "0",
+                "symbol": "BTCUSD.PERP"
+            },
+            "seq": 12441,
+            "type": "change_leverage_info"
+        }
+        "#;
+
+        let v: KolliderTaggedMsg = serde_json::from_str(data).unwrap();
+
+        assert_eq!(
+            v,
+            KolliderTaggedMsg::ChangeLeverageInfo {
+                error: None,
+                liquidation_price: None,
+                order_margin: 1000.000,
+                position_margin: 0.0,
+                symbol: "BTCUSD.PERP".to_owned(),
+            }
+        );
+    }
+
+    #[test]
+    fn test_change_leverage_success_msg() {
+        let data = r#"
+        {
+            "data": {
+                "symbol": "BTCUSD.PERP"
+            },
+            "seq": 12523,
+            "type": "change_leverage_success"
+        }
+        "#;
+
+        let v: KolliderTaggedMsg = serde_json::from_str(data).unwrap();
+
+        assert_eq!(
+            v,
+            KolliderTaggedMsg::ChangeLeverageSuccess {
+                symbol: "BTCUSD.PERP".to_owned(),
             }
         );
     }

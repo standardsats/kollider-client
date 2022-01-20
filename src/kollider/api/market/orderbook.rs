@@ -1,10 +1,9 @@
 use super::super::{products::Symbol, order::{OrderDetails}};
 use serde::{
     de::{self, Deserializer},
-    Serialize,
     Deserialize,
 };
-use std::{collections::HashMap, str::FromStr};
+use std::{collections::HashMap};
 
 /// Response item of the /market/orderbook
 #[derive(Debug, PartialEq, Clone)]
@@ -27,21 +26,21 @@ impl<'de> Deserialize<'de> for OrderBookResp {
                 .ok_or_else(|| de::Error::missing_field("seq_number"))?
                 .clone(),
         )
-        .map_err(|e| de::Error::custom(e))?;
+        .map_err(de::Error::custom)?;
 
         let symbol: Symbol = serde_json::from_value(
             json.get("symbol")
                 .ok_or_else(|| de::Error::missing_field("symbol"))?
                 .clone(),
         )
-        .map_err(|e| de::Error::custom(e))?;
+        .map_err(de::Error::custom)?;
 
         let level: OrderBookLevel = serde_json::from_value(
             json.get("level")
                 .ok_or_else(|| de::Error::missing_field("level"))?
                 .clone(),
         )
-        .map_err(|e| de::Error::custom(e))?;
+        .map_err(de::Error::custom)?;
 
         let book_value = json
             .get("book")
@@ -49,10 +48,10 @@ impl<'de> Deserialize<'de> for OrderBookResp {
             .clone();
         let book: OrderBook = match level {
             OrderBookLevel::Level2 => OrderBook::Level2(
-                serde_json::from_value(book_value).map_err(|e| de::Error::custom(e))?,
+                serde_json::from_value(book_value).map_err(de::Error::custom)?,
             ),
             OrderBookLevel::Level3 => OrderBook::Level3(
-                serde_json::from_value(book_value).map_err(|e| de::Error::custom(e))?,
+                serde_json::from_value(book_value).map_err(de::Error::custom)?,
             ),
         };
 
