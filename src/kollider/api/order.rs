@@ -112,6 +112,15 @@ pub enum OrderSide {
     Bid,
 }
 
+impl OrderSide {
+    pub fn inverse(v: Self) -> Self {
+        match v {
+            OrderSide::Ask => OrderSide::Bid,
+            OrderSide::Bid => OrderSide::Ask,
+        }
+    }
+}
+
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
 pub struct UnknownOrderSide(String);
 
