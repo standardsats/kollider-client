@@ -113,8 +113,8 @@ pub enum OrderSide {
 }
 
 impl OrderSide {
-    pub fn inverse(v: Self) -> Self {
-        match v {
+    pub fn inverse(&self) -> Self {
+        match self {
             OrderSide::Ask => OrderSide::Bid,
             OrderSide::Bid => OrderSide::Ask,
         }
