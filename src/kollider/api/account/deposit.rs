@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use rweb::Schema;
 
 /// Request body for the /wallet/deposit
-#[derive(Serialize, Debug, PartialEq, PartialOrd, Clone)]
+#[derive(Serialize, Debug, PartialEq, PartialOrd, Clone, Copy)]
 #[cfg_attr(feature = "openapi", derive(Schema))]
 #[serde(tag = "type", content = "amount")]
 pub enum DepositBody {

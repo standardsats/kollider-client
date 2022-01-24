@@ -5,7 +5,7 @@ use std::{fmt, str::FromStr};
 #[cfg(feature = "openapi")]
 use rweb::Schema;
 
-#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Copy)]
 #[cfg_attr(feature = "openapi", derive(Schema))]
 pub enum MarginType {
     Isolated,
@@ -37,7 +37,7 @@ impl FromStr for MarginType {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Copy)]
 #[cfg_attr(feature = "openapi", derive(Schema))]
 pub enum OrderType {
     Limit,
@@ -71,7 +71,7 @@ impl FromStr for OrderType {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Copy)]
 #[cfg_attr(feature = "openapi", derive(Schema))]
 pub enum SettlementType {
     Instant,
@@ -105,7 +105,7 @@ impl FromStr for SettlementType {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Copy)]
 #[cfg_attr(feature = "openapi", derive(Schema))]
 pub enum OrderSide {
     Ask,

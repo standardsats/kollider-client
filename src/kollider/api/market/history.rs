@@ -7,7 +7,7 @@ use std::str::FromStr;
 use rweb::Schema;
 
 /// Time interval between points in time. 5m, 15m, 1h, 1d
-#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Copy)]
 #[cfg_attr(feature = "openapi", derive(Schema))]
 pub enum IntervalSize {
     #[serde(rename = "5m")]

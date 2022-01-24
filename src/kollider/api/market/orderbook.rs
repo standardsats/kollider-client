@@ -64,7 +64,7 @@ impl<'de> Deserialize<'de> for OrderBookResp {
     }
 }
 
-#[derive(Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
+#[derive(Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Copy)]
 pub enum OrderBookLevel {
     Level2,
     Level3,

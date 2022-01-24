@@ -4,14 +4,14 @@ use serde::{Deserialize, Serialize};
 use rweb::Schema;
 
 /// Single value tag for tagging only one possible type of "Ln"
-#[derive(Serialize, Debug, PartialEq, PartialOrd, Clone)]
+#[derive(Serialize, Debug, PartialEq, PartialOrd, Clone, Copy)]
 #[cfg_attr(feature = "openapi", derive(Schema))]
 pub enum LnTag {
     Ln,
 }
 
 /// Single value tag for tagging only one possible type of "BTC"
-#[derive(Serialize, Debug, PartialEq, PartialOrd, Clone)]
+#[derive(Serialize, Debug, PartialEq, PartialOrd, Clone, Copy)]
 #[cfg_attr(feature = "openapi", derive(Schema))]
 pub enum BtcTag {
     BTC,
@@ -36,14 +36,14 @@ pub enum WithdrawalBody {
     },
 }
 
-#[derive(Serialize, Deserialize, Debug, PartialEq, PartialOrd, Clone)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, PartialOrd, Clone, Copy)]
 #[cfg_attr(feature = "openapi", derive(Schema))]
 pub enum WithdrawalNetwork {
     Lightning,
     Bitcoin,
 }
 
-#[derive(Serialize, Deserialize, Debug, PartialEq, PartialOrd, Clone)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, PartialOrd, Clone, Copy)]
 #[cfg_attr(feature = "openapi", derive(Schema))]
 pub enum WithdrawalStatus {
     Complete,

@@ -88,61 +88,61 @@ pub enum KolliderMsg {
     Tagged(KolliderTaggedMsg),
 }
 
-#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Copy)]
 #[cfg_attr(feature = "openapi", derive(Schema))]
 pub enum SubscribeTag {
     #[serde(rename = "subscribe")]
     Tag,
 }
-#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Copy)]
 #[cfg_attr(feature = "openapi", derive(Schema))]
 pub enum UnsubscribeTag {
     #[serde(rename = "unsubscribe")]
     Tag,
 }
-#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Copy)]
 #[cfg_attr(feature = "openapi", derive(Schema))]
 pub enum AuthenticateTag {
     #[serde(rename = "authenticate")]
     Tag,
 }
-#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Copy)]
 #[cfg_attr(feature = "openapi", derive(Schema))]
 pub enum OrderTag {
     #[serde(rename = "order")]
     Tag,
 }
-#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Copy)]
 #[cfg_attr(feature = "openapi", derive(Schema))]
 pub enum CancelOrderTag {
     #[serde(rename = "cancel_order")]
     Tag,
 }
-#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Copy)]
 #[cfg_attr(feature = "openapi", derive(Schema))]
 pub enum FetchOpenOrdersTag {
     #[serde(rename = "fetch_open_orders")]
     Tag,
 }
-#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Copy)]
 #[cfg_attr(feature = "openapi", derive(Schema))]
 pub enum FetchPositionsTag {
     #[serde(rename = "fetch_positions")]
     Tag,
 }
-#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Copy)]
 #[cfg_attr(feature = "openapi", derive(Schema))]
 pub enum GetTickerTag {
     #[serde(rename = "get_ticker")]
     Tag,
 }
-#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Copy)]
 #[cfg_attr(feature = "openapi", derive(Schema))]
 pub enum TradableProductsTag {
     #[serde(rename = "fetch_tradable_products")]
     Tag,
 }
-#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Copy)]
 #[cfg_attr(feature = "openapi", derive(Schema))]
 pub enum ErrorTag {
     #[serde(rename = "error")]
@@ -346,7 +346,7 @@ pub struct Position {
     pub upnl: f64,
 }
 
-#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Copy)]
 #[cfg_attr(feature = "openapi", derive(Schema))]
 pub enum ChannelName {
     #[serde(rename = "index_values")]
