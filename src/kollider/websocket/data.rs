@@ -287,6 +287,12 @@ pub enum KolliderTaggedMsg {
     },
     #[serde(rename = "change_leverage_success")]
     ChangeLeverageSuccess { symbol: Symbol },
+    #[serde(rename = "order_rejection")]
+    OrderRejection {
+        ext_order_id: String,
+        order_id: u64,
+        reason: OrderReject,
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
@@ -344,6 +350,12 @@ pub struct Position {
     pub uid: u64,
     #[serde(deserialize_with = "deserialize_number_from_string")]
     pub upnl: f64,
+}
+
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Copy)]
+#[cfg_attr(feature = "openapi", derive(Schema))]
+pub enum OrderReject {
+    NotEnoughAvailableBalance,
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Copy)]
@@ -690,6 +702,32 @@ mod tests {
             v,
             KolliderTaggedMsg::ChangeLeverageSuccess {
                 symbol: "BTCUSD.PERP".to_owned(),
+            }
+        );
+    }
+
+    #[test]
+    fn test_order_reject_msg() {
+        let data = r#"
+        {
+            "data": {
+              "ext_order_id": "02c73dc8-1ccc-4383-9304-2d20f4e68c5d",
+              "order_id": 18952570,
+              "reason": "NotEnoughAvailableBalance"
+            },
+            "seq": 11,
+            "type": "order_rejection"
+          }
+        "#;
+
+        let v: KolliderTaggedMsg = serde_json::from_str(data).unwrap();
+
+        assert_eq!(
+            v,
+            KolliderTaggedMsg::OrderRejection {
+                ext_order_id: "02c73dc8-1ccc-4383-9304-2d20f4e68c5d".to_owned(),
+                order_id: 18952570,
+                reason: OrderReject::NotEnoughAvailableBalance,
             }
         );
     }
