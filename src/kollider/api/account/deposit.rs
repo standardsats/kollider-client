@@ -14,6 +14,29 @@ pub enum DepositBody {
     Bitcoin,
 }
 
+#[derive(Serialize, Debug, PartialEq, PartialOrd, Clone)]
+#[cfg_attr(feature = "openapi", derive(Schema))]
+pub struct DepositBodyInner {
+    pub amount: Option<u64>,
+    #[serde(rename = "type")]
+    pub tag: String,
+}
+
+impl From<DepositBody> for DepositBodyInner {
+    fn from(value: DepositBody) -> Self {
+        match value {
+            DepositBody::Lighting(amount) => DepositBodyInner {
+                amount: Some(amount),
+                tag: "Ln".to_owned(),
+            },
+            DepositBody::Bitcoin => DepositBodyInner {
+                amount: None,
+                tag: "BTC".to_owned(),
+            },
+        }
+    }
+}
+
 /// Response item of the /wallet/deposit
 #[derive(Deserialize, Debug, PartialEq, PartialOrd, Clone)]
 #[cfg_attr(feature = "openapi", derive(Schema))]
