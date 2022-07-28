@@ -5,6 +5,7 @@ use futures::StreamExt;
 use kollider_api::kollider::api::*;
 use kollider_api::kollider::client::*;
 use kollider_api::kollider::websocket::*;
+use kollider_api::kollider::websocket::oneshot::*;
 use std::error::Error;
 use uuid::Uuid;
 
@@ -29,6 +30,8 @@ enum SubCommand {
     History(HistoryCmd),
     /// Get information about an account. Requires authentification.
     Account(AccountCmd),
+    /// Get information about balances via sync websocket request.
+    Balances(BalancesCmd),
     /// Deposit money to an account. Requires authentification.
     #[clap(subcommand)]
     Deposit(DepositSub),
@@ -73,6 +76,16 @@ struct HistoryCmd {
 
 #[derive(Parser, Debug)]
 struct AccountCmd {
+    #[clap(long, env = "KOLLIDER_API_KEY", hide_env_values = true)]
+    api_key: String,
+    #[clap(long, env = "KOLLIDER_API_SECRET", hide_env_values = true)]
+    api_secret: String,
+    #[clap(long, env = "KOLLIDER_API_PASSWORD", hide_env_values = true)]
+    password: String,
+}
+
+#[derive(Parser, Debug)]
+struct BalancesCmd {
     #[clap(long, env = "KOLLIDER_API_KEY", hide_env_values = true)]
     api_key: String,
     #[clap(long, env = "KOLLIDER_API_SECRET", hide_env_values = true)]
@@ -441,6 +454,15 @@ async fn main() -> Result<(), Box<dyn Error>> {
             client.auth = Some(auth);
             let resp = client.user_account().await?;
             println!("Response /user/account: {:?}", resp);
+        }
+        SubCommand::Balances(BalancesCmd {
+            api_key,
+            api_secret,
+            password,
+        }) => {
+            let auth = KolliderAuth::new(&api_key, &api_secret, &password)?;
+            let resp = fetch_balances(&auth).await?;
+            println!("Response WS fetch_balances: {:?}", resp);
         }
         SubCommand::Deposit(ref deposit_sub) => match deposit_sub {
             DepositSub::Btc(DepositBtc {
