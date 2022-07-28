@@ -277,11 +277,11 @@ struct WebsocketPrivateCmd {
     api_secret: String,
     #[clap(long, env = "KOLLIDER_API_PASSWORD", hide_env_values = true)]
     password: String,
-    /// Which symbol to filter from channels
-    #[clap(long, default_value = "BTCUSD")]
+    /// Which symbol to filter from channels. E.x. '.BTCUSD' or '.BTCEUR'
+    #[clap(long)]
     symbols: Vec<Symbol>,
     /// Which channels to listen
-    #[clap(default_value = "index_values")]
+    #[clap(long)]
     channels: Vec<ChannelName>,
     #[clap(subcommand)]
     action: Option<WebsocketAction>,
@@ -316,6 +316,7 @@ enum WebsocketAction {
     },
     FetchOpenOrders,
     FetchPositions,
+    FetchBalances,
     GetTicker {
         #[clap(long, default_value = "BTCUSD.PERP")]
         symbol: String,
@@ -365,6 +366,9 @@ impl WebsocketAction {
             },
             WebsocketAction::FetchPositions => KolliderMsg::FetchPositions {
                 _type: FetchPositionsTag::Tag,
+            },
+            WebsocketAction::FetchBalances => KolliderMsg::FetchBalances {
+                _type: FetchBalancesTag::Tag,
             },
             WebsocketAction::GetTicker { symbol } => KolliderMsg::GetTicker {
                 _type: GetTickerTag::Tag,

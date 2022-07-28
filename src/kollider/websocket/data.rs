@@ -76,6 +76,10 @@ pub enum KolliderMsg {
         #[serde(rename = "type")]
         _type: FetchPositionsTag,
     },
+    FetchBalances {
+        #[serde(rename = "type")]
+        _type: FetchBalancesTag,
+    },
     GetTicker {
         #[serde(rename = "type")]
         _type: GetTickerTag,
@@ -132,6 +136,12 @@ pub enum FetchPositionsTag {
 }
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Copy)]
 #[cfg_attr(feature = "openapi", derive(Schema))]
+pub enum FetchBalancesTag {
+    #[serde(rename = "fetch_balances")]
+    Tag,
+}
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Copy)]
+#[cfg_attr(feature = "openapi", derive(Schema))]
 pub enum GetTickerTag {
     #[serde(rename = "get_ticker")]
     Tag,
@@ -181,8 +191,7 @@ pub enum KolliderTaggedMsg {
     },
     #[serde(rename = "balances")]
     Balances {
-        #[serde(deserialize_with = "deserialize_number_from_string")]
-        cash: f64,
+        cash: BalancesCash,
         #[serde(deserialize_with = "deserialize_number_from_string")]
         cross_margin: f64,
         isolated_margin: HashMap<Symbol, WrappedPrice>,
@@ -218,7 +227,7 @@ pub enum KolliderTaggedMsg {
     #[serde(rename = "withdrawal_limit_info")]
     WithdrawalLimitInfo {
         daily_withdrawal_limits: HashMap<String, u64>,
-        daily_withdrawal_volumes: HashMap<String, u64>,
+        daily_withdrawal_volumes: HashMap<String, i64>,
     },
     #[serde(rename = "done")]
     Done {
@@ -293,6 +302,15 @@ pub enum KolliderTaggedMsg {
         order_id: u64,
         reason: OrderReject,
     }
+}
+
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
+#[cfg_attr(feature = "openapi", derive(Schema))]
+pub struct BalancesCash {
+    #[serde(rename="KKP", deserialize_with = "deserialize_number_from_string")]
+    pub kkp: f64,
+    #[serde(rename="SAT", deserialize_with = "deserialize_number_from_string")]
+    pub sat: f64, 
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
