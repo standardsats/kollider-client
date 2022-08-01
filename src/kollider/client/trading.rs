@@ -70,8 +70,8 @@ impl KolliderClient {
         self.delete_request_auth(
             "/orders",
             &[
-                ("symbol", symbol.to_owned()),
                 ("order_id", order_id.to_owned()),
+                ("symbol", symbol.to_owned()),
             ],
         )
         .await
