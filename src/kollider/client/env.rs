@@ -186,6 +186,7 @@ impl Default for KolliderClient {
     }
 }
 
+#[derive(Clone)]
 pub struct KolliderAuth {
     pub api_key: String,
     pub api_secret: Vec<u8>,
