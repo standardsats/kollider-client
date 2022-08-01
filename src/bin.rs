@@ -32,6 +32,8 @@ enum SubCommand {
     Account(AccountCmd),
     /// Get information about balances via sync websocket request.
     Balances(BalancesCmd),
+    /// Get information about positions via sync 
+    Positions(PositionsCmd),
     /// Deposit money to an account. Requires authentification.
     #[clap(subcommand)]
     Deposit(DepositSub),
@@ -86,6 +88,16 @@ struct AccountCmd {
 
 #[derive(Parser, Debug)]
 struct BalancesCmd {
+    #[clap(long, env = "KOLLIDER_API_KEY", hide_env_values = true)]
+    api_key: String,
+    #[clap(long, env = "KOLLIDER_API_SECRET", hide_env_values = true)]
+    api_secret: String,
+    #[clap(long, env = "KOLLIDER_API_PASSWORD", hide_env_values = true)]
+    password: String,
+}
+
+#[derive(Parser, Debug)]
+struct PositionsCmd {
     #[clap(long, env = "KOLLIDER_API_KEY", hide_env_values = true)]
     api_key: String,
     #[clap(long, env = "KOLLIDER_API_SECRET", hide_env_values = true)]
@@ -463,6 +475,15 @@ async fn main() -> Result<(), Box<dyn Error>> {
             let auth = KolliderAuth::new(&api_key, &api_secret, &password)?;
             let resp = fetch_balances(&auth).await?;
             println!("Response WS fetch_balances: {:?}", resp);
+        }
+        SubCommand::Positions(PositionsCmd {
+            api_key,
+            api_secret,
+            password,
+        }) => {
+            let auth = KolliderAuth::new(&api_key, &api_secret, &password)?;
+            let resp = fetch_positions(&auth).await?;
+            println!("Response WS fetch_positions: {:?}", resp);
         }
         SubCommand::Deposit(ref deposit_sub) => match deposit_sub {
             DepositSub::Btc(DepositBtc {
