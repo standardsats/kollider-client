@@ -165,11 +165,7 @@ impl KolliderClient {
         let endpoint = format!("{}{}", self.server, path);
 
         let body: Option<serde_json::Value> = Some(serde_json::to_value(query_args)?);
-        let raw_request = if let Some(b) = &body {
-            self.client.delete(endpoint).json(b)
-        } else {
-            self.client.delete(endpoint)
-        };
+        let raw_request = self.client.delete(endpoint).query(query_args);
         let request = auth
             .inject_auth("DELETE", path, body, raw_request)?
             .build()?;
