@@ -4,7 +4,14 @@ use crate::kollider::api::{
     FillDetails, OrderBody, OrderCreated, OrderDetails, OrderPrediction, PositionDetails, Symbol,
 };
 use chrono::prelude::*;
+use serde::Serialize;
 use std::collections::HashMap;
+
+#[derive(Serialize)]
+struct CancelOrder {
+    order_id: String,
+    symbol: String,
+}
 
 impl KolliderClient {
     pub async fn create_order(&self, body: &OrderBody) -> Result<OrderCreated> {
@@ -69,10 +76,10 @@ impl KolliderClient {
     ) -> Result<HashMap<Symbol, PositionDetails>> {
         self.delete_request_auth(
             "/orders",
-            &[
-                ("order_id", order_id.to_owned()),
-                ("symbol", symbol.to_owned()),
-            ],
+            &CancelOrder {
+                order_id: order_id.to_owned(),
+                symbol: symbol.to_owned(),
+            },
         )
         .await
     }
