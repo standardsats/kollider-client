@@ -10,14 +10,14 @@ use rweb::Schema;
 #[cfg_attr(feature = "openapi", derive(Schema))]
 pub struct Ticker {
     #[serde(deserialize_with = "deserialize_number_from_string")]
-    best_ask: f64,
+    pub best_ask: f64,
     #[serde(deserialize_with = "deserialize_number_from_string")]
-    best_bid: f64,
+    pub best_bid: f64,
     #[serde(deserialize_with = "deserialize_number_from_string")]
-    last_price: f64,
-    last_quantity: u64,
-    last_side: OrderSide,
-    symbol: Symbol,
+    pub last_price: f64,
+    pub last_quantity: u64,
+    pub last_side: OrderSide,
+    pub symbol: Symbol,
 }
 
 #[cfg(test)]
