@@ -140,20 +140,26 @@ pub async fn fetch_positions(auth: &KolliderAuth) -> Result<HashMap<Symbol, Posi
 }
 
 /// Open websocket and request positions as synchronous request
-pub async fn cancel_order(auth: &KolliderAuth, order_id: u64, symbol: &str) -> Result<(), Error> {
+pub async fn cancel_order(
+    auth: &KolliderAuth,
+    cancel_order_id: u64,
+    symbol: &str,
+) -> Result<(), Error> {
     oneshot_authed(
         auth,
         KolliderMsg::CancelOrder {
             _type: CancelOrderTag::Tag,
-            order_id,
+            order_id: cancel_order_id,
             symbol: symbol.to_owned(),
             settlement_type: SettlementType::Delayed,
         },
         |message| async move {
             match message {
-                KolliderMsg::Tagged(KolliderTaggedMsg::Success(_)) => Ok(Some(())),
+                KolliderMsg::Tagged(KolliderTaggedMsg::Done {
+                    reason, order_id, ..
+                }) if order_id == cancel_order_id && reason == "Cancel" => Ok(Some(())),
                 KolliderMsg::Tagged(KolliderTaggedMsg::Error(msg)) => {
-                    Err(Error::CancelError(order_id, msg))
+                    Err(Error::CancelError(cancel_order_id, msg))
                 }
                 _ => Ok(None),
             }

@@ -283,7 +283,7 @@ struct OrderCancelCmd {
     #[clap(long, default_value = "BTCUSD.PERP")]
     symbol: String,
     /// ID of order to cancel
-    order_id: String,
+    order_id: u64,
 }
 
 #[derive(Parser, Debug)]
@@ -668,7 +668,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             }) => {
                 let auth = KolliderAuth::new(&api_key, &api_secret, &password)?;
                 client.auth = Some(auth);
-                let resp = client.cancel_order(&symbol, &order_id).await?;
+                let resp = client.cancel_order(&symbol, order_id).await?;
                 println!("Response /orders: {:?}", resp);
             }
         },

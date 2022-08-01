@@ -14,6 +14,8 @@ pub enum Error {
     AuthRequired(String),
     #[error("Error while forming authentification heaaders: {0}")]
     AuthError(#[from] AuthError),
+    #[error("Cannot cancel order {0} for ticker {1} due reason: {2}")]
+    CancelOrder(u64, String, String),
 }
 
 /// Alias for a `Result` with the error type `self::Error`.

@@ -1,16 +1,21 @@
 use super::env::KolliderClient;
-use super::error::Result;
+use super::error::{Error, Result};
 use crate::kollider::api::{
     FillDetails, OrderBody, OrderCreated, OrderDetails, OrderPrediction, PositionDetails, Symbol,
 };
 use chrono::prelude::*;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 #[derive(Serialize)]
 struct CancelOrder {
-    order_id: String,
+    order_id: u64,
     symbol: String,
+}
+
+#[derive(Deserialize)]
+struct CancelResult {
+    reason: String,
 }
 
 impl KolliderClient {
@@ -69,18 +74,24 @@ impl KolliderClient {
         self.get_request_auth_noargs("/positions").await
     }
 
-    pub async fn cancel_order(
-        &self,
-        symbol: &str,
-        order_id: &str,
-    ) -> Result<HashMap<Symbol, PositionDetails>> {
-        self.delete_request_auth(
-            "/orders",
-            &CancelOrder {
-                order_id: order_id.to_owned(),
-                symbol: symbol.to_owned(),
-            },
-        )
-        .await
+    pub async fn cancel_order(&self, symbol: &str, order_id: u64) -> Result<()> {
+        let inner_result: CancelResult = self
+            .delete_request_auth(
+                "/orders",
+                &CancelOrder {
+                    order_id: order_id,
+                    symbol: symbol.to_owned(),
+                },
+            )
+            .await?;
+        if inner_result.reason == "Cancel" {
+            Ok(())
+        } else {
+            Err(Error::CancelOrder(
+                order_id,
+                symbol.to_owned(),
+                inner_result.reason,
+            ))
+        }
     }
 }
