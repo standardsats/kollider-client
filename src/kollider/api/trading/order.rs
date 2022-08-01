@@ -8,14 +8,14 @@ use serde_aux::field_attributes::deserialize_number_from_string;
 /// Body of post /orders
 #[derive(Serialize, Debug, PartialEq, PartialOrd, Clone)]
 pub struct OrderBody {
-    pub price: u64,
-    pub order_type: OrderType,
-    pub side: OrderSide,
-    pub quantity: u64,
-    pub symbol: Symbol,
     pub leverage: u64,
     pub margin_type: MarginType,
+    pub order_type: OrderType,
+    pub price: u64,
+    pub quantity: u64,
     pub settlement_type: SettlementType,
+    pub side: OrderSide,
+    pub symbol: Symbol,
 }
 
 #[derive(Deserialize, Debug, PartialEq, PartialOrd, Clone)]
