@@ -87,7 +87,7 @@ mod tests {
 
         assert_eq!(
             v,
-            r#"{"price":100,"order_type":"Limit","side":"Bid","quantity":10,"symbol":"BTCUSD.PERP","leverage":100,"margin_type":"Isolated","settlement_type":"Delayed"}"#
+            r#"{"leverage":100,"margin_type":"Isolated","order_type":"Limit","price":100,"quantity":10,"settlement_type":"Delayed","side":"Bid","symbol":"BTCUSD.PERP"}"#
         );
     }
 
